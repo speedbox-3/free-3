@@ -940,6 +940,9 @@ const downloadSrtBtn = document.getElementById('downloadSrtBtn');
 const srtOutputFilenameInput = document.getElementById('srtOutputFilename');
 const srtOutput = document.getElementById('srtOutput');
 const srtOutputMeta = document.getElementById('srtOutputMeta');
+const checkTimestampsOutputBtn = document.getElementById('checkTimestampsOutputBtn');
+const checkUntranslatedBtn = document.getElementById('checkUntranslatedBtn');
+const srtCheckResultsBox = document.getElementById('srtCheckResultsBox');
 const sendToTtsBtn = document.getElementById('sendToTtsBtn');
 
 // ---- Translator-only state ----
@@ -1339,8 +1342,10 @@ async function translateSrtWithWorkers(subs, chunkSize, targetLang, workerCount,
     }
 
     chunks.forEach((chunk, ci) => {
+        const chunkStillFailed = failedIdx.has(ci);
         chunk.forEach((sub, si) => {
             sub.translatedText = (results[ci] && results[ci][si] !== undefined) ? results[ci][si] : sub.textLines.join('\n');
+            sub.translationFailed = chunkStillFailed; // used by the output panel's "untranslated check" button
         });
     });
 
@@ -1424,7 +1429,114 @@ clearSrtBtn.addEventListener('click', () => {
     lastTranslatedSubs = null;
     lastSrtSourceFileName = null;
     srtOutputFilenameInput.value = '';
+    srtCheckResultsBox.classList.add('hidden');
+    srtCheckResultsBox.innerHTML = '';
     updateSrtInputMeta();
+});
+
+// =============================================================
+// Output panel checks: timestamp errors + still-untranslated lines
+// =============================================================
+function parseSrtTimestampToMs(ts) {
+    const m = ts.trim().match(/^(\d{2}):(\d{2}):(\d{2}),(\d{3})$/);
+    if (!m) return null;
+    const [, hh, mm, ss, ms] = m;
+    return ((parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseInt(ss, 10)) * 1000) + parseInt(ms, 10);
+}
+
+// Scans cue timestamps for format errors, zero/negative duration, and overlaps with
+// the previous cue — the common issues that break playback sync in a video player.
+function checkSrtTimestamps(subs) {
+    const issues = [];
+    let prevEndMs = -1;
+    subs.forEach((s, i) => {
+        const parts = s.timeLine.split('-->').map(p => p.trim());
+        if (parts.length !== 2) {
+            issues.push(`#${i + 1}: timestamp line format မှားနေသည် — "${s.timeLine}"`);
+            return;
+        }
+        const startMs = parseSrtTimestampToMs(parts[0]);
+        const endMs = parseSrtTimestampToMs(parts[1]);
+        if (startMs === null || endMs === null) {
+            issues.push(`#${i + 1}: timestamp format မှန်ကန်မှုမရှိပါ (HH:MM:SS,mmm ဖြစ်ရပါမည်) — "${s.timeLine}"`);
+            return;
+        }
+        if (endMs <= startMs) {
+            issues.push(`#${i + 1}: အဆုံးအချိန်သည် အစချိန်ထက် စောနေသည်/တူနေသည် — "${s.timeLine}"`);
+        }
+        if (prevEndMs !== -1 && startMs < prevEndMs) {
+            issues.push(`#${i + 1}: ရှေ့ subtitle နှင့် timestamp ထပ်နေသည် (overlap) — "${s.timeLine}"`);
+        }
+        prevEndMs = Math.max(prevEndMs, endMs);
+    });
+    return issues;
+}
+
+// Flags any line still sitting on its original (untranslated) text — either because
+// translateSrtWithWorkers marked its chunk as still-failed after all recovery passes,
+// or because the translated text happens to be identical to the source text.
+function checkUntranslatedLines(subs) {
+    const issues = [];
+    subs.forEach((s, i) => {
+        const original = s.textLines.join('\n').trim();
+        const translated = (s.translatedText !== undefined && s.translatedText !== null) ? String(s.translatedText).trim() : '';
+        if (s.translationFailed || (translated && translated === original)) {
+            const preview = original.length > 60 ? original.slice(0, 60) + '…' : original;
+            issues.push(`#${i + 1} [${s.timeLine.split('-->')[0].trim()}]: "${preview}"`);
+        }
+    });
+    return issues;
+}
+
+function renderCheckResults(title, issues, emptyMsg) {
+    srtCheckResultsBox.classList.remove('hidden');
+    srtCheckResultsBox.innerHTML = '';
+    const header = document.createElement('div');
+    header.className = 'font-mono text-[10px] text-purple-300 uppercase tracking-widest mb-1';
+    header.textContent = title;
+    srtCheckResultsBox.appendChild(header);
+
+    if (issues.length === 0) {
+        const line = document.createElement('div');
+        line.className = 'log-entry-ok';
+        line.textContent = `✓ ${emptyMsg}`;
+        srtCheckResultsBox.appendChild(line);
+        return;
+    }
+    issues.forEach(msg => {
+        const line = document.createElement('div');
+        line.className = 'log-entry-err';
+        line.textContent = `✗ ${msg}`;
+        srtCheckResultsBox.appendChild(line);
+    });
+}
+
+function showCheckNotice(msg) {
+    srtCheckResultsBox.classList.remove('hidden');
+    srtCheckResultsBox.innerHTML = '';
+    const line = document.createElement('div');
+    line.className = 'log-entry-warn';
+    line.textContent = msg;
+    srtCheckResultsBox.appendChild(line);
+}
+
+checkTimestampsOutputBtn.addEventListener('click', () => {
+    const subs = lastTranslatedSubs || parseSrt(srtOutput.value);
+    if (!subs || subs.length === 0) {
+        showCheckNotice('SRT output မရှိသေးပါ — အရင် Translate လုပ်ပါ');
+        return;
+    }
+    const issues = checkSrtTimestamps(subs);
+    renderCheckResults(`TIMESTAMP CHECK — ${subs.length} lines စစ်ဆေးပြီး`, issues, 'Timestamp error များ မတွေ့ပါ');
+});
+
+checkUntranslatedBtn.addEventListener('click', () => {
+    if (!lastTranslatedSubs || lastTranslatedSubs.length === 0) {
+        showCheckNotice('Translate လုပ်ပြီးမှသာ ဒီ check ကို လုပ်နိုင်ပါသည်');
+        return;
+    }
+    const issues = checkUntranslatedLines(lastTranslatedSubs);
+    renderCheckResults(`ဘာသာမပြန်ရသေးသော lines — ${lastTranslatedSubs.length} lines စစ်ဆေးပြီး`, issues, 'အားလုံး ဘာသာပြန်ပြီးပါပြီ');
 });
 
 // =============================================================
@@ -1475,6 +1587,8 @@ async function handleTranslateSrt() {
     transProgressPanel.classList.remove('hidden');
     transLogBox.innerHTML = '';
     srtOutput.value = '';
+    srtCheckResultsBox.classList.add('hidden');
+    srtCheckResultsBox.innerHTML = '';
 
     logTrans(`SRT ${subs.length} subtitles / ${Math.ceil(subs.length / chunkSize)} chunks / ${workerCount} workers ဖြင့် ဘာသာပြန်စတင်ပါပြီ → ${targetLang}`);
 
