@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MDS // Myanmar Dub Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Myanmar:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="grid-overlay">
+
+<div class="max-w-5xl mx-auto px-5 py-8 md:py-12">
+
+  <!-- Header -->
+  <header class="flex items-center justify-between mb-10">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-sm glow-cyan flex items-center justify-center font-display text-[var(--cyan)] text-sm">音</div>
+      <div>
+        <div class="font-display tracking-[0.2em] text-sm text-glow">MYANMAR DUB STUDIO</div>
+        <div class="font-mono text-[10px] text-[var(--ink-dim)] tracking-widest">RECAP // TRANSLATE // DUB — v1.0</div>
+      </div>
+    </div>
+    <div class="font-mono text-[10px] text-[var(--ink-dim)] hidden sm:block">MP4 IN → MP4 OUT</div>
+  </header>
+
+  <!-- Upload / ingest terminal -->
+  <section class="relative rounded-lg bg-[var(--surface)] p-6 md:p-8 mb-8 overflow-hidden glow-cyan">
+    <div class="scanline"></div>
+    <div class="relative z-10">
+      <div class="font-mono text-[11px] text-[var(--cyan)] tracking-widest mb-3">01 · INGEST</div>
+      <div id="dropzone" class="dropzone rounded-md p-8 md:p-12 text-center cursor-pointer">
+        <p class="font-display text-lg md:text-xl mb-1">Drop MP4 files to begin</p>
+        <p class="font-mono text-xs text-[var(--ink-dim)]">Short clips, a few minutes each · batch upload supported</p>
+        <input id="fileInput" type="file" accept=".mp4,.mov,.m4v" multiple class="hidden" />
+      </div>
+      <ul id="fileList" class="mt-4 space-y-1 font-mono text-xs text-[var(--ink-dim)]"></ul>
+    </div>
+  </section>
+
+  <!-- Controls -->
+  <section class="rounded-lg bg-[var(--surface)] p-6 md:p-8 mb-8">
+    <div class="font-mono text-[11px] text-[var(--magenta)] tracking-widest mb-5">02 · DUB SETTINGS</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <label class="block font-mono text-xs text-[var(--ink-dim)] mb-2">VOICE</label>
+        <select id="voiceSelect" class="w-full bg-[var(--surface-2)] border border-[var(--line)] rounded px-3 py-2 font-display text-sm focus:outline-none focus:ring-1 focus:ring-[var(--cyan)]"></select>
+      </div>
+      <div>
+        <label class="block font-mono text-xs text-[var(--ink-dim)] mb-2">SUBTITLES</label>
+        <div class="flex gap-2">
+          <button data-sub="off" class="sub-btn flex-1 py-2 rounded border border-[var(--line)] font-mono text-xs">OFF</button>
+          <button data-sub="soft" class="sub-btn flex-1 py-2 rounded border border-[var(--line)] font-mono text-xs">SOFT (toggle)</button>
+          <button data-sub="burned" class="sub-btn flex-1 py-2 rounded border border-[var(--line)] font-mono text-xs">BURNED-IN</button>
+        </div>
+      </div>
+      <div>
+        <label class="flex justify-between font-mono text-xs text-[var(--ink-dim)] mb-2">
+          <span>SPEED</span><span id="speedVal" class="text-[var(--cyan)]">1.00x</span>
+        </label>
+        <input id="speedRange" type="range" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full" />
+      </div>
+      <div>
+        <label class="flex justify-between font-mono text-xs text-[var(--ink-dim)] mb-2">
+          <span>PITCH</span><span id="pitchVal" class="text-[var(--cyan)]">0 st</span>
+        </label>
+        <input id="pitchRange" type="range" min="-6" max="6" step="0.5" value="0" class="w-full" />
+      </div>
+      <div class="md:col-span-2 flex items-center gap-3">
+        <input id="recapCheck" type="checkbox" class="w-4 h-4 accent-[var(--magenta)]" />
+        <label for="recapCheck" class="font-mono text-xs text-[var(--ink-dim)]">Also generate a short text recap/summary</label>
+      </div>
+    </div>
+
+    <button id="generateBtn" disabled
+      class="mt-7 w-full py-3 rounded font-display tracking-widest text-sm bg-[var(--cyan)] text-black disabled:opacity-30 disabled:cursor-not-allowed hover:brightness-110 transition">
+      ▶ GENERATE
+    </button>
+  </section>
+
+  <!-- Queue -->
+  <section id="queueSection" class="rounded-lg bg-[var(--surface)] p-6 md:p-8 mb-8 hidden">
+    <div class="font-mono text-[11px] text-[var(--amber)] tracking-widest mb-5">03 · PIPELINE</div>
+    <div id="queue" class="space-y-4"></div>
+  </section>
+
+  <footer class="font-mono text-[10px] text-[var(--ink-dim)] text-center pt-4 pb-8">
+    Use on content you own or have rights to dub. Original video + your own Myanmar audio, out the other side.
+  </footer>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

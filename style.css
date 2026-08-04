@@ -1,0 +1,67 @@
+  :root{
+    --bg:#07060c;
+    --surface:#100e1c;
+    --surface-2:#17142a;
+    --line:#2a2545;
+    --cyan:#39f2e0;
+    --magenta:#ff2f92;
+    --amber:#ffb100;
+    --ink:#eae7f5;
+    --ink-dim:#8f8ab3;
+  }
+  *{box-sizing:border-box}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(57,242,224,0.08), transparent 40%),
+      radial-gradient(circle at 85% 20%, rgba(255,47,146,0.10), transparent 45%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .font-display{font-family:'Chakra Petch',sans-serif}
+  .font-mono{font-family:'JetBrains Mono',monospace}
+  .font-my{font-family:'Noto Sans Myanmar','Inter',sans-serif}
+
+  .grid-overlay{
+    background-image:
+      linear-gradient(rgba(57,242,224,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57,242,224,0.05) 1px, transparent 1px);
+    background-size:36px 36px;
+  }
+  .glow-cyan{ box-shadow: 0 0 0 1px rgba(57,242,224,0.35), 0 0 22px rgba(57,242,224,0.18); }
+  .glow-magenta{ box-shadow: 0 0 0 1px rgba(255,47,146,0.4), 0 0 22px rgba(255,47,146,0.2); }
+  .text-glow{ text-shadow: 0 0 12px rgba(57,242,224,0.55); }
+
+  .scanline{
+    position:absolute; inset:0; pointer-events:none; overflow:hidden; border-radius:inherit;
+  }
+  .scanline::after{
+    content:""; position:absolute; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--cyan), transparent);
+    animation:scan 3.2s linear infinite;
+    opacity:.7;
+  }
+  @keyframes scan{ 0%{top:-5%} 100%{top:105%} }
+
+  .dropzone{
+    border:1px dashed rgba(57,242,224,0.4);
+    transition:border-color .2s, background-color .2s;
+  }
+  .dropzone.drag{
+    border-color:var(--magenta);
+    background:rgba(255,47,146,0.06);
+  }
+
+  input[type=range]{ -webkit-appearance:none; height:4px; border-radius:2px; background:var(--line); }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+    background:var(--cyan); box-shadow:0 0 10px rgba(57,242,224,0.8); cursor:pointer;
+  }
+
+  .stage-dot{ width:9px; height:9px; border-radius:50%; background:var(--line); }
+  .stage-dot.active{ background:var(--cyan); box-shadow:0 0 8px rgba(57,242,224,0.9); }
+  .stage-dot.done{ background:var(--amber); }
+  .stage-dot.failed{ background:var(--magenta); }
+
+  ::selection{ background:var(--magenta); color:#fff; }
