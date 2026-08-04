@@ -1,232 +1,999 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RecapAI Myanmar</title>
-    <!-- Vite handles this CSS file parsing and injection of Tailwind -->
-    <link rel="stylesheet" href="/src/style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Myanmar:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-  </head>
-  <body class="antialiased">
-    
-    <!-- Main Container -->
-    <main class="min-h-screen flex flex-col items-center justify-center p-4">
-        
-        <!-- Header -->
-        <header class="text-center mb-10 w-full max-w-2xl">
-            <div class="flex items-center justify-center gap-4 mb-6">
-                <!-- App Logo Icon -->
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(188,19,254,0.4)]">
-                    <i data-lucide="film" class="text-white w-8 h-8"></i>
-                </div>
-                <div class="text-left">
-                    <h1 class="text-5xl font-bold tracking-tight text-white mb-1">Recap<span class="neon-text-blue">AI</span></h1>
-                    <p class="text-xl font-medium neon-text-purple tracking-wider">Myanmar</p>
-                </div>
-            </div>
-            
-            <p class="text-lg text-slate-300 font-medium leading-relaxed max-w-xl mx-auto font-['Noto_Sans_Myanmar']">
-                Movie Recap ဗီဒီယိုတွေကို အဆင့်မြင့် AI စနစ်ဖြင့် မြန်မာလို အလိုအလျောက် အသံသွင်း၊ ဘာသာပြန်၊ ဖန်တီးလိုက်ပါ။
-            </p>
-        </header>
+<!DOCTYPE html>
+<html lang="my" class="dark" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO-YANGON 2026 | Transcribe + SRT Translator + Holographic Neural TTS Engine</title>
 
-        <!-- Main Form Section -->
-        <section id="main-form" class="w-full max-w-xl glass-panel rounded-3xl p-8 backdrop-blur-xl relative z-10 transition-all duration-500">
-            
-            <!-- API Key Input -->
-            <div class="mb-6 group">
-                <div class="relative flex items-center bg-[#0a0a0f] rounded-xl neon-border transition-all duration-300 overflow-hidden">
-                    <div class="pl-4 pr-3 text-cyan-400">
-                        <i data-lucide="key" class="w-5 h-5"></i>
-                    </div>
-                    <input 
-                        type="password" 
-                        id="gemini-api-key" 
-                        placeholder="Gemini API Key ထည့်ပါ" 
-                        class="w-full bg-transparent text-white py-4 pr-4 outline-none placeholder:text-slate-500 font-['Noto_Sans_Myanmar']"
-                        autocomplete="off"
-                    >
-                </div>
-            </div>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Cyberpunk & Burmese Legibility -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Padauk:wght@400;700&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- FontAwesome for futuristic HUD icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-            <!-- Drag & Drop Zone -->
-            <div 
-                id="drop-zone" 
-                class="mb-6 border-2 border-dashed border-slate-600 rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 hover:border-cyan-400 hover:bg-cyan-900/10 group"
-            >
-                <input type="file" id="video-input" accept="video/mp4,video/quicktime,video/x-matroska" class="hidden">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 group-hover:bg-cyan-900 flex items-center justify-center transition-colors">
-                    <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 group-hover:text-cyan-400"></i>
-                </div>
-                <h3 class="text-lg font-medium text-white mb-2 font-['Noto_Sans_Myanmar']">ဗီဒီယိုဖိုင် ဆွဲထည့်ပါ သို့မဟုတ် ရွေးချယ်ပါ</h3>
-                <p class="text-sm text-slate-500">MP4, MOV, MKV files are supported</p>
-                
-                <div id="file-info" class="hidden mt-4 pt-4 border-t border-slate-700/50">
-                    <div class="flex items-center justify-center gap-2 text-cyan-400">
-                        <i data-lucide="video" class="w-4 h-4"></i>
-                        <span id="file-name" class="font-medium text-sm"></span>
-                    </div>
-                </div>
-            </div>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#04060c',
+                            card: 'rgba(12, 18, 32, 0.65)',
+                            pink: '#ff0055',
+                            cyan: '#00f3ff',
+                            yellow: '#ffee00',
+                            purple: '#9d00ff',
+                            emerald: '#00ffaa',
+                            glass: 'rgba(255, 255, 255, 0.03)'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                        burmese: ['Padauk', 'Myanmar Text', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
 
-            <!-- Settings Grid -->
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <!-- Voice Selection -->
-                <div class="bg-[#0a0a0f]/80 p-4 rounded-xl border border-slate-700/50 hover:border-purple-500/50 transition-colors">
-                    <label class="block text-xs text-slate-400 mb-2 font-['Noto_Sans_Myanmar']"><i data-lucide="mic" class="inline w-3 h-3 mr-1"></i> အသံအမျိုးအစား (Voice)</label>
-                    <select id="voice-profile" class="w-full bg-transparent text-white outline-none text-sm font-['Noto_Sans_Myanmar'] cursor-pointer">
-                        <option value="Zephyr" class="bg-[#0a0a0f]">ကိုလ (Zephyr) - ပြတ်သား</option>
-                        <option value="Fenrir" class="bg-[#0a0a0f]">မင်းသား (Fenrir) - တက်ကြွ</option>
-                        <option value="Kore" class="bg-[#0a0a0f]">မရှင် (Kore) - တည်ကြည်</option>
-                        <option value="Puck" class="bg-[#0a0a0f]" selected>ပပ် (Puck) - ပျော်ရွှင်</option>
-                        <option value="Aoede" class="bg-[#0a0a0f]">နင်း (Aoede) - နူးညံ့</option>
-                    </select>
-                </div>
-                
-                <!-- Aspect Ratio -->
-                <div class="bg-[#0a0a0f]/80 p-4 rounded-xl border border-slate-700/50 hover:border-cyan-500/50 transition-colors">
-                    <label class="block text-xs text-slate-400 mb-2 font-['Noto_Sans_Myanmar']"><i data-lucide="monitor" class="inline w-3 h-3 mr-1"></i> ဗီဒီယို ဖော်မတ်</label>
-                    <select id="aspect-ratio" class="w-full bg-transparent text-white outline-none text-sm cursor-pointer">
-                        <option value="original" class="bg-[#0a0a0f]">Original</option>
-                        <option value="16:9" class="bg-[#0a0a0f]">16:9 (YouTube)</option>
-                        <option value="9:16" class="bg-[#0a0a0f]">9:16 (Shorts/TikTok)</option>
-                    </select>
-                </div>
+    <link rel="stylesheet" href="style.css">
+</head>
 
-                <!-- Zoom FX -->
-                <div class="bg-[#0a0a0f]/80 p-4 rounded-xl border border-slate-700/50 hover:border-purple-500/50 transition-colors col-span-2">
-                    <div class="flex justify-between mb-2">
-                        <label class="block text-xs text-slate-400 font-['Noto_Sans_Myanmar']"><i data-lucide="zoom-in" class="inline w-3 h-3 mr-1"></i> Cinematic Auto-Zoom & Pan</label>
-                        <span id="zoom-value" class="text-xs text-purple-400 font-mono">115%</span>
-                    </div>
-                    <input type="range" id="zoom-level" min="100" max="150" value="115" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500">
+<body class="min-h-screen relative flex flex-col justify-between p-3 sm:p-6 md:p-8 antialiased selection:bg-cyan-500 selection:text-black">
+
+    <!-- Background Particle Canvas -->
+    <canvas id="bgGridCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+    <!-- Scanline Visual Layer -->
+    <div class="fixed inset-0 scanlines z-10 opacity-30"></div>
+
+    <!-- Top Floating HUD Banner -->
+    <header class="relative z-20 w-full max-w-7xl mx-auto mb-6">
+        <div class="holo-glass holo-corner p-4 sm:p-6 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4 holo-shimmer border-cyan-500/30">
+            <!-- Left Brand Title -->
+            <div class="flex items-center gap-4">
+                <div class="relative w-12 h-12 flex items-center justify-center rounded-lg bg-black/60 border border-cyan-400/50 shadow-[0_0_15px_rgba(0,243,255,0.3)]">
+                    <i class="fa-solid fa-microchip text-2xl text-[var(--neon-cyan)] animate-pulse"></i>
+                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-pink-500"></span>
+                    </span>
+                </div>
+                <div>
+                    <h1 class="font-orbitron font-extrabold text-2xl sm:text-3xl text-white tracking-wider flex items-center gap-2">
+                        NAYPYIDAW <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--neon-cyan)] via-purple-400 to-[var(--neon-pink)] text-glow-cyan">2026</span>
+                    </h1>
+                    <p class="font-mono text-xs sm:text-sm text-cyan-300/80 tracking-[0.25em] uppercase flex items-center gap-2">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        Neural Audio Matrix v6.0 • Transcribe / Translate / Speak
+                    </p>
                 </div>
             </div>
 
-            <!-- Auto Run Toggle -->
-            <div class="flex items-center justify-between bg-[#0a0a0f]/80 p-4 rounded-xl border border-slate-700/50 mb-6">
-                <label class="flex items-center cursor-pointer">
-                    <div class="relative">
-                        <input type="checkbox" id="auto-run-toggle" class="sr-only">
-                        <div class="block bg-slate-700 w-10 h-6 rounded-full transition-colors toggle-bg"></div>
-                        <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform transform"></div>
-                    </div>
-                    <div class="ml-3 text-sm text-slate-300 font-['Noto_Sans_Myanmar']">ဗီဒီယိုရွေးပြီးသည်နှင့် အလိုအလျောက်စတင်ပါ (Auto Run)</div>
-                </label>
+            <!-- System Status Badges + Theme Toggle -->
+            <div class="flex items-center gap-3 font-mono text-xs flex-wrap justify-center">
+                <div class="px-3 py-1.5 rounded-md bg-black/50 border border-cyan-500/30 text-cyan-300 flex items-center gap-2">
+                    <i class="fa-solid fa-key text-emerald-400"></i>
+                    <span>KEYS: <strong id="keyCountBadge" class="text-white">0</strong></span>
+                </div>
+                <div class="px-3 py-1.5 rounded-md bg-black/50 border border-pink-500/30 text-pink-300 flex items-center gap-2">
+                    <i class="fa-solid fa-microchip text-pink-400"></i>
+                    <span>MODEL: <strong id="modelBadge" class="text-white">-</strong></span>
+                </div>
+                <button id="themeToggleBtn" class="px-3 py-1.5 rounded-md bg-black/50 border border-purple-500/30 text-purple-300 flex items-center gap-2 hover:border-purple-400 transition-all" title="Theme ပြောင်းရန်">
+                    <i class="fa-solid fa-circle-half-stroke text-yellow-400"></i>
+                    <span id="themeLabel">DARK</span>
+                </button>
             </div>
+        </div>
+    </header>
 
-            <!-- Start Button -->
-            <button id="start-btn" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 text-white font-bold py-4 px-6 rounded-xl shadow-[0_0_20px_rgba(188,19,254,0.4)] transition-all transform hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2 font-['Noto_Sans_Myanmar']">
-                <i data-lucide="sparkles" class="w-5 h-5"></i>
-                ဗီဒီယိုဖန်တီးပါ
+    <!-- Tool Mode Switcher -->
+    <nav class="relative z-20 w-full max-w-7xl mx-auto mb-6">
+        <div class="holo-glass holo-corner p-2 rounded-xl flex flex-wrap gap-2 border-purple-500/30">
+            <button id="tabTranscribeBtn" class="tab-btn flex-1 min-w-[150px] flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-orbitron font-bold text-xs sm:text-sm tracking-widest transition-all" data-view="transcribe">
+                <i class="fa-solid fa-microphone-lines"></i>
+                <span>မီဒီယာ → SRT (TRANSCRIBE)</span>
             </button>
-            
-            <!-- Error Message Box -->
-            <div id="error-container" class="hidden mt-4 p-4 bg-red-900/30 border border-red-500/50 rounded-xl">
-                <div class="flex gap-3 text-red-400">
-                    <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0"></i>
-                    <p id="error-text" class="text-sm font-['Noto_Sans_Myanmar']"></p>
+            <button id="tabTranslatorBtn" class="tab-btn flex-1 min-w-[150px] flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-orbitron font-bold text-xs sm:text-sm tracking-widest transition-all" data-view="translator">
+                <i class="fa-solid fa-closed-captioning"></i>
+                <span>SRT ဘာသာပြန် (TRANSLATOR)</span>
+            </button>
+            <button id="tabTtsBtn" class="tab-btn flex-1 min-w-[150px] flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-orbitron font-bold text-xs sm:text-sm tracking-widest transition-all" data-view="tts">
+                <i class="fa-solid fa-wave-square"></i>
+                <span>စာသား → အသံ (TEXT TO SPEECH)</span>
+            </button>
+            <button id="tabRecapBtn" class="tab-btn flex-1 min-w-[150px] flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-orbitron font-bold text-xs sm:text-sm tracking-widest transition-all" data-view="recap">
+                <i class="fa-solid fa-clapperboard"></i>
+                <span>AI RECAP STUDIO (ONE CLICK)</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════ TTS ENGINE VIEW ═══════════════════════════ -->
+    <div id="ttsView">
+    <!-- Main Workspace Matrix Grid -->
+    <main class="relative z-20 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+
+        <!-- Left Panel: Text Script Input & Presets (7 Columns) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+
+            <!-- API Key & Model Rotation Manager -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-emerald-500/30">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-500/20">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-key text-emerald-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            Key &amp; Model Rotation <span class="text-xs font-mono text-emerald-400/70 font-normal">(AUTO ROTATE)</span>
+                        </h2>
+                    </div>
+                    <button id="toggleKeyPanelBtn" class="font-mono text-xs text-emerald-300 border border-emerald-500/30 rounded px-2 py-1 hover:bg-emerald-900/40">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div id="keyPanelBody" class="space-y-4">
+                    <div>
+                        <label class="block font-mono text-xs text-cyan-300 uppercase tracking-widest mb-2 font-semibold">
+                            Gemini API Keys (တစ်ကြောင်းလျှင် တစ်ခု / comma လည်းရ)
+                        </label>
+                        <textarea id="apiKeysInput" rows="3" placeholder="AIzaSy...key1&#10;AIzaSy...key2&#10;AIzaSy...key3"
+                            class="w-full p-3 rounded-lg bg-black/60 border border-emerald-500/30 text-emerald-200 placeholder-emerald-800/60 font-mono text-xs focus:outline-none focus:border-cyan-500/80 resize-y"></textarea>
+                        <p class="font-mono text-[10px] text-cyan-500/60 mt-1">Key တွေအားလုံး request တစ်ခုစီအတွက် round-robin rotate ဖြစ်ပြီး၊ quota/error တွေ့ရင် နောက် key ကို auto ပြောင်းသုံးပါမည်။ Key များကို browser ထဲမှာသာ (localStorage) သိမ်းပါသည်၊ ဘယ် server ကိုမှ မပို့ပါ။</p>
+                    </div>
+
+                    <div>
+                        <label class="block font-mono text-xs text-pink-300 uppercase tracking-widest mb-2 font-semibold">
+                            TTS Model List (တစ်ကြောင်းလျှင် model id တစ်ခု)
+                        </label>
+                        <textarea id="modelsInput" rows="3"
+                            class="w-full p-3 rounded-lg bg-black/60 border border-pink-500/30 text-pink-200 placeholder-pink-800/60 font-mono text-xs focus:outline-none focus:border-cyan-500/80 resize-y"></textarea>
+                        <p class="font-mono text-[10px] text-cyan-500/60 mt-1">
+                            "gemini-2.5-flash-preview-tts" နှင့် "gemini-2.5-pro-preview-tts" ကတော့ verified model names ဖြစ်ပါတယ်။ အခြား model (3.1 စီးရီး စသည်) key access ရှိရင် Google AI Studio ထဲက exact model id ကို ကြည့်ပြီး ဒီနေရာမှာ ထပ်ထည့်ပါ — list ထဲမှာ ဘယ်နှစ်ခုပဲရှိရှိ auto rotation က အလုပ်လုပ်ပါလိမ့်မယ်။
+                        </p>
+                    </div>
+
+                    <button id="saveKeysModelsBtn" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-black font-orbitron font-bold text-xs tracking-widest transition-all">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> SAVE KEYS &amp; MODELS
+                    </button>
+                    <span id="saveStatusMsg" class="font-mono text-xs text-emerald-400 ml-3"></span>
                 </div>
             </div>
 
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl flex flex-col flex-grow border-cyan-500/30">
+                <!-- Panel Header -->
+                <div class="flex justify-between items-center pb-3 mb-4 border-b border-cyan-500/20">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-terminal text-cyan-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            စာသားထည့်သွင်းစနစ် <span class="text-xs font-mono text-cyan-400/70 font-normal">(TEXT SCRIPT STREAM)</span>
+                        </h2>
+                    </div>
+                    <span class="font-mono text-xs text-cyan-300/80 bg-cyan-950/60 border border-cyan-500/30 px-2.5 py-1 rounded">
+                        <i class="fa-solid fa-font text-cyan-400 mr-1"></i>
+                        <span id="charCount">0</span> / 10000 CHARS
+                    </span>
+                </div>
+
+                <!-- Textarea Script Input Box -->
+                <div class="relative flex-grow min-h-[220px] mb-4">
+                    <textarea id="textInput" maxlength="10000"
+                        class="w-full h-full p-4 rounded-lg bg-black/60 border border-cyan-500/30 text-cyan-100 placeholder-cyan-700/60 font-burmese text-base leading-relaxed focus:outline-none focus:border-pink-500/80 focus:ring-2 focus:ring-pink-500/20 transition-all resize-none"
+                        placeholder="ဤနေရာတွင် မြန်မာ သို့မဟုတ် အင်္ဂလိပ် စာသား ရိုက်ထည့်ပါ (စာလုံးရေ ၁၀၀၀၀ အထိ လက်ခံပါသည်)။ စနစ်မှ အလိုအလျောက် အပိုင်းလိုက် ခွဲခြားပြီး ကြည်လင်ပြတ်သားသော အသံအဖြစ် မပြတ်တမ်း ဆက်တိုက် ပေါင်းစပ် ထုတ်လုပ်ပေးမည်ဖြစ်ပါသည်။"></textarea>
+
+                    <div class="absolute bottom-3 right-3 text-[10px] font-mono text-cyan-500/40 pointer-events-none">
+                        NEURAL_UTF8_ENCODER_ACTIVE
+                    </div>
+                </div>
+
+                <!-- Quick Action Buttons -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button id="clearBtn" class="px-4 py-3 rounded-lg bg-black/40 hover:bg-red-950/50 border border-red-500/30 text-red-300 font-mono text-sm tracking-wider flex items-center justify-center gap-2 transition-all hover:border-red-400">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>စာသားရှင်းထုတ်မည် (CLEAR)</span>
+                    </button>
+
+                    <button id="generateBtn" class="px-6 py-3 rounded-lg bg-gradient-to-r from-pink-600 via-purple-600 to-cyan-600 hover:from-pink-500 hover:to-cyan-500 text-white font-orbitron font-bold text-sm tracking-widest shadow-[0_0_20px_rgba(255,0,85,0.4)] hover:shadow-[0_0_30px_rgba(0,243,255,0.6)] flex items-center justify-center gap-3 transition-all transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-bolt text-yellow-300 text-base animate-bounce"></i>
+                        <span>အသံထုတ်လုပ်မည် (SYNTHESIZE)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Global Memory / Glossary Panel -->
+            <div class="holo-glass holo-corner p-4 sm:p-5 rounded-xl border-yellow-500/30">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-book-atlas text-yellow-400 text-sm"></i>
+                        <h3 class="font-orbitron font-semibold text-xs tracking-widest text-yellow-300 uppercase">
+                            Global Memory / Glossary (အသံထွက် အစားထိုးစာရင်း)
+                        </h3>
+                    </div>
+                    <label class="flex items-center gap-2 font-mono text-[10px] text-cyan-300">
+                        <input type="checkbox" id="glossaryEnabledChk" checked class="accent-cyan-400">
+                        ENABLED
+                    </label>
+                </div>
+                <p class="font-mono text-[10px] text-cyan-500/60 mb-3">Synthesize မလုပ်ခင် စာသားထဲက စကားလုံး/အတိုကောက်များကို ဒီစာရင်းအတိုင်း auto ပြောင်းပေးပါမည် (ဥပမာ - "AI" → "အေအိုင်")။</p>
+
+                <div class="flex flex-col sm:flex-row gap-2 mb-3">
+                    <input id="glossaryTermInput" type="text" placeholder="မူရင်း စကားလုံး" class="flex-1 p-2 rounded bg-black/60 border border-yellow-500/30 text-yellow-100 font-burmese text-xs focus:outline-none focus:border-cyan-500/80">
+                    <input id="glossaryReplInput" type="text" placeholder="အစားထိုး / အသံထွက်" class="flex-1 p-2 rounded bg-black/60 border border-yellow-500/30 text-yellow-100 font-burmese text-xs focus:outline-none focus:border-cyan-500/80">
+                    <button id="glossaryAddBtn" class="px-3 py-2 rounded bg-yellow-600 hover:bg-yellow-500 text-black font-mono text-xs font-bold">
+                        <i class="fa-solid fa-plus"></i> ADD
+                    </button>
+                </div>
+
+                <div id="glossaryList" class="space-y-1 max-h-40 overflow-y-auto font-burmese text-xs"></div>
+            </div>
+
+            <!-- Cyber Sample Data Scripts -->
+            <div class="holo-glass holo-corner p-4 sm:p-5 rounded-xl border-purple-500/30">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-database text-yellow-400 text-sm"></i>
+                    <h3 class="font-orbitron font-semibold text-xs tracking-widest text-yellow-300 uppercase">
+                        စမ်းသပ်ရန် စာသားနမူနာများ (QUICK SCRIPT FRAGMENTS)
+                    </h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 font-burmese text-xs">
+                    <button class="prompt-btn p-2.5 rounded bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 text-cyan-200 text-left transition-all flex flex-col gap-1"
+                        data-text="မင်္ဂလာပါ၊ ၂၀၂၆ ခုနှစ် နေပြည်တော် ဆိုက်ဘာပန့်ခ် သတင်းကွန်ရက်မှ ကြိုဆိုပါတယ်။ လက်ရှိ အသံထုတ်လုပ်မှုစနစ်သည် အထူးကြည်လင်ပြတ်သားသော နီယွန် နည်းပညာဖြစ်ပါတယ်။">
+                        <span class="font-mono text-[10px] text-cyan-400 font-bold uppercase"><i class="fa-solid fa-bullhorn mr-1"></i> Myanmar Greeting</span>
+                        <span class="truncate opacity-80">မင်္ဂလာပါ၊ နေပြည်တော်...</span>
+                    </button>
+
+                    <button class="prompt-btn p-2.5 rounded bg-pink-950/40 hover:bg-pink-900/60 border border-pink-500/30 text-pink-200 text-left transition-all flex flex-col gap-1"
+                        data-text="Warning: Cybernetic security system initiated. Access codes granted for Yangon Sector 7 mainframe. Proceed with caution.">
+                        <span class="font-mono text-[10px] text-pink-400 font-bold uppercase"><i class="fa-solid fa-shield-halved mr-1"></i> Cyber Alarm (Eng)</span>
+                        <span class="truncate opacity-80">Warning: Security system...</span>
+                    </button>
+
+                    <button class="prompt-btn p-2.5 rounded bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 text-purple-200 text-left transition-all flex flex-col gap-1"
+                        data-text="အနာဂတ် ဆိုက်ဘာနည်းပညာတွင် မြန်မာစကားပြော စနစ်သည် ပိုမို သဘာဝကျပြီး သာယာငြိမ့်ညောင်းသော အသံကို ထုတ်လုပ်ပေးနိုင်ပြီဖြစ်ပါသည်။">
+                        <span class="font-mono text-[10px] text-purple-400 font-bold uppercase"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Tech Announcement</span>
+                        <span class="truncate opacity-80">အနာဂတ် ဆိုက်ဘာနည်းပညာ...</span>
+                    </button>
+                </div>
+            </div>
         </section>
 
-        <!-- Recent Projects Section -->
-        <section id="recent-projects-section" class="hidden w-full max-w-xl glass-panel rounded-3xl p-6 backdrop-blur-xl relative z-10 transition-all duration-500 mt-8">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold text-white font-['Noto_Sans_Myanmar'] flex items-center gap-2">
-                    <i data-lucide="clock" class="w-5 h-5 text-cyan-400"></i>
-                    မကြာသေးမီက ပရောဂျက်များ (Recent Projects)
-                </h3>
-                <button id="clear-recent-btn" class="text-xs text-slate-400 hover:text-red-400 transition-colors">ဖျက်မည်</button>
+        <!-- Right Panel: Voice Selection, Audio Enhancers & Visualizer (5 Columns) -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+
+            <!-- Voice Selection & Audio Processing Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-pink-500/30">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-pink-500/20">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-sliders text-pink-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            အသံမော်ဒယ် ရွေးချယ်မှု <span class="text-xs font-mono text-pink-400/70 font-normal">(VOICE & FX)</span>
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- Voice Select Dropdown -->
+                <div class="mb-4">
+                    <label class="block font-mono text-xs text-cyan-300 uppercase tracking-widest mb-2 font-semibold">
+                        အသံအမျိုးအစား ရွေးရန် (NEURAL VOICE MODEL)
+                    </label>
+                    <div class="relative">
+                        <select id="voiceSelect" class="w-full p-3 pr-10 rounded-lg bg-black/70 border border-cyan-500/40 text-cyan-200 font-mono text-sm appearance-none focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 cursor-pointer">
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-cyan-400">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="voiceInfo" class="bg-black/60 border border-cyan-500/20 p-3 rounded-lg mb-5 font-mono text-xs text-cyan-200/90 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-pink-400"></i>
+                    <span>အသံမော်ဒယ် အချက်အလက်များ ဖော်ပြမည်။</span>
+                </div>
+
+                <div class="space-y-4 pt-2 border-t border-cyan-500/10">
+                    <div>
+                        <div class="flex justify-between items-center font-mono text-xs mb-1.5">
+                            <span class="text-cyan-300"><i class="fa-solid fa-gauge-high text-cyan-400 mr-1.5"></i>အသံမြန်နှုန်း (SPEED)</span>
+                            <span id="speedVal" class="text-yellow-400 font-bold">1.0x</span>
+                        </div>
+                        <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full cursor-pointer">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button id="clarityBoostBtn" class="px-3 py-2 rounded bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 font-mono text-xs flex items-center justify-center gap-2 transition-all">
+                            <i class="fa-solid fa-sparkles text-yellow-400"></i>
+                            <span id="clarityStatus">Clarity Boost: ON</span>
+                        </button>
+                        <button id="spatial3dBtn" class="px-3 py-2 rounded bg-purple-950/60 hover:bg-purple-900 border border-purple-500/40 text-purple-300 font-mono text-xs flex items-center justify-center gap-2 transition-all">
+                            <i class="fa-solid fa-vr-cardboard text-purple-400"></i>
+                            <span id="spatialStatus">Cyber Reverb: OFF</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div id="recent-projects-list" class="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                <!-- Items will be injected here -->
+
+            <!-- Audio Output & Holographic Visualizer Panel -->
+            <div class="holo-glass holo-corner p-0 rounded-xl border-cyan-500/30 overflow-hidden flex flex-col flex-grow">
+
+                <div class="p-4 border-b border-cyan-500/20 bg-black/40 flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-wave-square text-cyan-400"></i>
+                        <h2 class="font-orbitron font-bold text-sm tracking-wider text-white uppercase">
+                            ဟိုလိုဂရမ် အသံလိုင်းပြကွက် (HOLO VISUALIZER)
+                        </h2>
+                    </div>
+                    <div class="flex gap-1 font-mono text-[10px]">
+                        <button id="visSpectrumBtn" class="px-2 py-1 rounded bg-cyan-500 text-black font-bold">SPECTRUM</button>
+                        <button id="visWaveBtn" class="px-2 py-1 rounded bg-black/60 text-cyan-400 border border-cyan-500/30">WAVE</button>
+                    </div>
+                </div>
+
+                <div class="relative w-full h-36 bg-black/80 flex items-center justify-center">
+                    <canvas id="visualizer" class="w-full h-full block"></canvas>
+
+                    <div id="loadingOverlay" class="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center gap-3 hidden z-30">
+                        <div class="relative flex items-center justify-center">
+                            <div class="w-12 h-12 rounded-full border-2 border-pink-500 border-t-transparent animate-spin"></div>
+                            <i class="fa-solid fa-brain absolute text-cyan-400 text-sm animate-pulse"></i>
+                        </div>
+                        <div class="text-center px-4">
+                            <span id="loadingMainText" class="font-orbitron font-bold text-xs tracking-widest text-cyan-300 block animate-pulse">
+                                SYNTHESIZING NEURAL AUDIO...
+                            </span>
+                            <span id="loadingSubText" class="font-burmese text-[11px] text-pink-400 block mt-1">အသံလိုင်းများ ဖန်တီးနေပါသည်။ ခေတ္တစောင့်ဆိုင်းပါ။</span>
+                            <div id="chunkProgressBarContainer" class="w-48 h-1.5 bg-gray-800 rounded-full mt-3 overflow-hidden border border-cyan-500/30 mx-auto hidden">
+                                <div id="chunkProgressBar" class="h-full bg-cyan-400 w-0 transition-all duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-black/60 flex-grow flex flex-col justify-center gap-3">
+                    <audio id="audioPlayer" class="hidden"></audio>
+
+                    <div id="customControls" class="flex items-center gap-4 opacity-50 pointer-events-none transition-opacity duration-300">
+                        <button id="playPauseBtn" class="w-11 h-11 rounded-full bg-cyan-500/20 hover:bg-cyan-500 border border-cyan-400 text-cyan-300 hover:text-black flex items-center justify-center transition-all shadow-[0_0_15px_rgba(0,243,255,0.3)]">
+                            <i class="fa-solid fa-play ml-0.5 text-base"></i>
+                        </button>
+
+                        <div class="flex-grow flex flex-col gap-1.5">
+                            <div id="progressTrack" class="w-full h-2 bg-gray-900 rounded-full cursor-pointer relative overflow-hidden border border-cyan-500/30">
+                                <div id="progressBar" class="h-full bg-gradient-to-r from-cyan-400 to-pink-500 w-0 absolute top-0 left-0 transition-all duration-100"></div>
+                            </div>
+                            <div class="flex justify-between font-mono text-[11px] text-cyan-300/80">
+                                <span id="timeCurrent">00:00</span>
+                                <span id="timeTotal">00:00</span>
+                            </div>
+                        </div>
+
+                        <button id="downloadBtn" class="w-10 h-10 rounded-lg bg-pink-950/60 hover:bg-pink-600 border border-pink-500/50 text-pink-300 hover:text-white flex items-center justify-center transition-all shadow-[0_0_12px_rgba(255,0,85,0.3)]" title="Download Crystal Clean WAV File">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-black/90 p-2 px-4 font-mono text-[10px] flex justify-between items-center border-t border-cyan-500/20">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span id="statusText" class="text-emerald-400 font-semibold">SYSTEM READY // STANDBY</span>
+                    </div>
+                    <span class="text-cyan-500/60 uppercase hidden sm:inline">24000Hz • PCM WAV 16-BIT</span>
+                </div>
+            </div>
+        </section>
+    </main>
+    </div>
+    <!-- ═══════════════════════ END TTS ENGINE VIEW ═══════════════════════════ -->
+
+    <!-- ═══════════════════════ SRT TRANSLATOR VIEW ═══════════════════════════ -->
+    <div id="translatorView" class="hidden">
+    <main class="relative z-20 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+
+        <!-- Left Panel: SRT Input, Controls & Progress (7 Columns) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+
+            <!-- Translation Model Rotation Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-emerald-500/30">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-500/20">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-key text-emerald-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            ဘာသာပြန် Model Rotation <span class="text-xs font-mono text-emerald-400/70 font-normal">(SHARED KEYS)</span>
+                        </h2>
+                    </div>
+                    <button id="toggleTransKeyPanelBtn" class="font-mono text-xs text-emerald-300 border border-emerald-500/30 rounded px-2 py-1 hover:bg-emerald-900/40">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div id="transKeyPanelBody" class="space-y-4">
+                    <p class="font-mono text-[10px] text-cyan-500/60 -mt-1">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        API Key များကို "Text to Speech" tab ထဲက <strong class="text-cyan-300">Key &amp; Model Rotation</strong> panel နှင့် အတူတူပဲ အသုံးပြုပါသည် — ဒီနေရာမှာ ထပ်ထည့်စရာမလိုပါ။
+                    </p>
+                    <div>
+                        <label class="block font-mono text-xs text-pink-300 uppercase tracking-widest mb-2 font-semibold">
+                            Translation Model List (တစ်ကြောင်းလျှင် model id တစ်ခု)
+                        </label>
+                        <textarea id="transModelsInput" rows="3"
+                            class="w-full p-3 rounded-lg bg-black/60 border border-pink-500/30 text-pink-200 placeholder-pink-800/60 font-mono text-xs focus:outline-none focus:border-cyan-500/80 resize-y"></textarea>
+                        <p class="font-mono text-[10px] text-cyan-500/60 mt-1">
+                            Text ဘာသာပြန်ရန် Gemini text model များ (ဥပမာ gemini-2.5-flash) — key/model rotation က auto လုပ်ပေးပါမည်။
+                        </p>
+                    </div>
+                    <button id="saveTransModelsBtn" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-black font-orbitron font-bold text-xs tracking-widest transition-all">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> SAVE MODELS
+                    </button>
+                    <span id="transSaveStatusMsg" class="font-mono text-xs text-emerald-400 ml-3"></span>
+                </div>
+            </div>
+
+            <!-- SRT Input Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl flex flex-col border-cyan-500/30">
+                <div class="flex justify-between items-center pb-3 mb-4 border-b border-cyan-500/20 flex-wrap gap-2">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-file-import text-cyan-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            မူရင်း SRT <span class="text-xs font-mono text-cyan-400/70 font-normal">(ORIGINAL SUBTITLE)</span>
+                        </h2>
+                    </div>
+                    <label for="srtFileInput" class="cursor-pointer px-3 py-1.5 rounded-lg bg-black/50 border border-cyan-500/40 text-cyan-300 font-mono text-xs hover:border-cyan-300 transition-all">
+                        <i class="fa-solid fa-folder-open mr-1"></i> Open .srt File
+                    </label>
+                    <input type="file" id="srtFileInput" accept=".srt,.txt" class="hidden">
+                </div>
+
+                <textarea id="srtInput"
+                    class="w-full h-56 p-4 rounded-lg bg-black/60 border border-cyan-500/30 text-cyan-100 placeholder-cyan-700/60 font-mono text-xs leading-relaxed focus:outline-none focus:border-pink-500/80 focus:ring-2 focus:ring-pink-500/20 transition-all resize-y"
+                    placeholder="မူရင်း SRT စာသားကို ဒီနေရာတွင် paste လုပ်ပါ သို့မဟုတ် ဖိုင်ဖွင့်ပါ...&#10;&#10;1&#10;00:00:01,000 --> 00:00:04,000&#10;Hello everyone, welcome."></textarea>
+
+                <div id="srtInputMeta" class="mt-2 font-mono text-[10px] text-cyan-500/60">
+                    Subtitles: 0 | Chunks: 0
+                </div>
+            </div>
+
+            <!-- Global Memory / Glossary Panel (Translator view — shared with TTS tab's list) -->
+            <div class="holo-glass holo-corner p-4 sm:p-5 rounded-xl border-yellow-500/30">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-book-atlas text-yellow-400 text-sm"></i>
+                        <h3 class="font-orbitron font-semibold text-xs tracking-widest text-yellow-300 uppercase">
+                            Global Memory / Glossary (ဘာသာပြန် အစားထိုးစာရင်း)
+                        </h3>
+                    </div>
+                    <label class="flex items-center gap-2 font-mono text-[10px] text-cyan-300">
+                        <input type="checkbox" id="transGlossaryEnabledChk" checked class="accent-cyan-400">
+                        ENABLED
+                    </label>
+                </div>
+                <p class="font-mono text-[10px] text-cyan-500/60 mb-3">TTS tab ထဲက Global Memory စာရင်းအတူတူပါ — Translate မလုပ်ခင် ဘာသာပြန်ရလဒ်ထဲက စကားလုံးများကို ဒီစာရင်းအတိုင်း auto အစားထိုးပေးပါမည် (ဥပမာ - "AI" → "အေအိုင်")။</p>
+
+                <div class="flex flex-col sm:flex-row gap-2 mb-3">
+                    <input id="transGlossaryTermInput" type="text" placeholder="မူရင်း စကားလုံး" class="flex-1 p-2 rounded bg-black/60 border border-yellow-500/30 text-yellow-100 font-burmese text-xs focus:outline-none focus:border-cyan-500/80">
+                    <input id="transGlossaryReplInput" type="text" placeholder="အစားထိုး စကားလုံး" class="flex-1 p-2 rounded bg-black/60 border border-yellow-500/30 text-yellow-100 font-burmese text-xs focus:outline-none focus:border-cyan-500/80">
+                    <button id="transGlossaryAddBtn" class="px-3 py-2 rounded bg-yellow-600 hover:bg-yellow-500 text-black font-mono text-xs font-bold">
+                        <i class="fa-solid fa-plus"></i> ADD
+                    </button>
+                </div>
+
+                <div id="transGlossaryList" class="space-y-1 max-h-40 overflow-y-auto font-burmese text-xs"></div>
+            </div>
+
+            <!-- Global Context Memory Panel (free-text instructions injected into the translation prompt) -->
+            <div class="holo-glass holo-corner p-4 sm:p-5 rounded-xl border-yellow-500/30">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-brain text-yellow-400 text-sm"></i>
+                        <h3 class="font-orbitron font-semibold text-xs tracking-widest text-yellow-300 uppercase">
+                            Global Context Memory
+                        </h3>
+                    </div>
+                    <label class="flex items-center gap-2 font-mono text-[10px] text-cyan-300">
+                        <input type="checkbox" id="contextMemoryEnabledChk" checked class="accent-cyan-400">
+                        ENABLED
+                    </label>
+                </div>
+                <p class="font-mono text-[10px] text-cyan-500/60 mb-3">ဒီနေရာမှာ ရေးထားတဲ့ context / instructions ကို Translate တိုင်း prompt ထဲ auto ထည့်ပေးပါမည် (ဥပမာ - ဇာတ်ကြောင်းအကျဉ်း၊ ဇာတ်ကောင်အမည်များ၊ အသုံးအနှုန်း၊ tone ညွှန်ကြားချက်စသည်)။</p>
+
+                <textarea id="globalContextMemory" rows="4"
+                    class="w-full p-3 rounded-lg bg-black/60 border border-yellow-500/30 text-yellow-100 placeholder-yellow-800/60 font-burmese text-xs leading-relaxed focus:outline-none focus:border-cyan-500/80 resize-y"
+                    placeholder="ဥပမာ - ဒါက sci-fi series တစ်ခုပါ / ဇာတ်ကောင် Kai ကို 'ကိုင်' လို့ပဲ ဘာသာပြန်ပါ / စကားပြောပုံစံ ရိုးရိုးသားသား ဖြစ်စေချင်ပါတယ်..."></textarea>
+
+                <div class="flex justify-end mt-2">
+                    <button id="saveContextMemoryBtn" class="px-3 py-1.5 rounded-lg bg-yellow-600 hover:bg-yellow-500 text-black font-mono text-xs font-bold">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> SAVE
+                    </button>
+                    <span id="contextMemorySavedMsg" class="font-mono text-xs text-emerald-400 ml-3 self-center"></span>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-pink-500/30">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Chunk Size</label>
+                        <input type="number" id="chunkSize" value="30" min="5" max="150" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                    </div>
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Max Retries</label>
+                        <input type="number" id="maxRetries" value="3" min="1" max="10" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                    </div>
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Timeout (s)</label>
+                        <input type="number" id="timeoutSec" value="60" min="10" max="300" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                    </div>
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Workers</label>
+                        <input type="number" id="workerCount" value="3" min="1" max="8" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Target Language</label>
+                    <select id="targetLang" class="w-full p-2.5 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                        <option value="Myanmar (Burmese)" selected>မြန်မာဘာသာ (Myanmar)</option>
+                        <option value="Thai">ภาษาไทย (Thai)</option>
+                        <option value="Chinese (Simplified)">中文 (Chinese Simplified)</option>
+                        <option value="English">English</option>
+                        <option value="Japanese">日本語 (Japanese)</option>
+                        <option value="Korean">한국어 (Korean)</option>
+                    </select>
+                </div>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button id="clearSrtBtn" class="px-4 py-3 rounded-lg bg-black/40 hover:bg-red-950/50 border border-red-500/30 text-red-300 font-mono text-sm tracking-wider flex items-center justify-center gap-2 transition-all hover:border-red-400">
+                        <i class="fa-solid fa-trash-can"></i><span>CLEAR</span>
+                    </button>
+                    <button id="translateBtn" class="px-6 py-3 rounded-lg bg-gradient-to-r from-pink-600 via-purple-600 to-cyan-600 hover:from-pink-500 hover:to-cyan-500 text-white font-orbitron font-bold text-sm tracking-widest shadow-[0_0_20px_rgba(255,0,85,0.4)] hover:shadow-[0_0_30px_rgba(0,243,255,0.6)] flex items-center justify-center gap-3 transition-all transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-bolt text-yellow-300 text-base"></i><span>TRANSLATE</span>
+                    </button>
+                    <button id="stopTranslateBtn" disabled class="px-4 py-3 rounded-lg bg-black/40 hover:bg-yellow-950/50 border border-yellow-500/30 text-yellow-300 font-mono text-sm tracking-wider flex items-center justify-center gap-2 transition-all disabled:opacity-40">
+                        <i class="fa-solid fa-stop"></i><span>STOP</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Panel -->
+            <div id="transProgressPanel" class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-purple-500/30 hidden">
+                <div class="flex justify-between items-center pb-3 mb-3 border-b border-purple-500/20">
+                    <h2 class="font-orbitron font-bold text-sm tracking-wide text-white uppercase">
+                        <i class="fa-solid fa-gears text-purple-400 mr-1"></i> Processing
+                    </h2>
+                    <span id="transPctBadge" class="font-mono text-xs text-purple-300 bg-purple-950/60 border border-purple-500/30 px-2.5 py-1 rounded">0%</span>
+                </div>
+                <div class="w-full h-2 bg-gray-900 rounded-full overflow-hidden border border-purple-500/30 mb-3">
+                    <div id="transProgressFill" class="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 w-0 transition-all duration-300"></div>
+                </div>
+                <div id="transWorkerGrid" class="flex flex-wrap gap-2 mb-3 font-mono text-[10px]"></div>
+                <div id="transLogBox" class="h-32 overflow-y-auto bg-black/60 border border-purple-500/20 rounded-lg p-2 font-mono text-[10px] text-cyan-300/80 space-y-0.5"></div>
             </div>
         </section>
 
-        <!-- Dynamic Dashboard / Processing View -->
-        <section id="dashboard" class="hidden w-full max-w-xl glass-panel rounded-3xl p-8 backdrop-blur-xl relative z-10 transition-all duration-500">
-             
-             <div class="text-center mb-8">
-                 <h2 id="current-status-text" class="text-2xl font-bold text-white mb-2 font-['Noto_Sans_Myanmar'] neon-text-blue">စတင်နေသည်...</h2>
-                 <p class="text-sm text-slate-400">Please wait while our AI processes the video</p>
-             </div>
+        <!-- Right Panel: Output (5 Columns) -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl flex flex-col flex-grow border-cyan-500/30">
+                <div class="flex justify-between items-center pb-3 mb-4 border-b border-cyan-500/20 flex-wrap gap-2">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-file-export text-cyan-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            ဘာသာပြန်ပြီး SRT <span id="outputDoneBadge" class="text-xs font-mono text-emerald-400/90 font-normal hidden">✓ DONE</span>
+                        </h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="copySrtBtn" class="px-3 py-1.5 rounded-lg bg-black/50 border border-cyan-500/40 text-cyan-300 font-mono text-xs hover:border-cyan-300 transition-all">
+                            <i class="fa-solid fa-copy mr-1"></i> Copy
+                        </button>
+                        <button id="downloadSrtBtn" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-black font-mono text-xs font-bold transition-all">
+                            <i class="fa-solid fa-download mr-1"></i> Download
+                        </button>
+                    </div>
+                </div>
 
-             <!-- Main Progress Bar -->
-             <div class="w-full h-3 bg-slate-800 rounded-full mb-10 overflow-hidden border border-slate-700 shadow-inner">
-                 <div id="progress-bar" class="h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-600 progress-bar-fill rounded-full shadow-[0_0_10px_rgba(0,243,255,0.8)]" style="width: 0%"></div>
-             </div>
+                <div class="flex items-center gap-2 mb-3">
+                    <label for="srtOutputFilename" class="font-mono text-[10px] text-cyan-300 uppercase tracking-widest whitespace-nowrap">File name</label>
+                    <input type="text" id="srtOutputFilename" placeholder="translated_..."
+                        class="flex-grow p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 placeholder-cyan-800/60 font-mono text-xs focus:outline-none focus:border-cyan-400/80">
+                    <span class="font-mono text-xs text-cyan-500/60">.srt</span>
+                </div>
 
-             <!-- Steps Checklist -->
-             <div class="space-y-4">
-                 
-                 <div class="step-indicator flex items-center gap-4" data-step="analyzing">
-                     <div class="icon-wrapper w-10 h-10 rounded-full flex items-center justify-center bg-slate-800 transition-all duration-300">
-                         <i data-lucide="film" class="w-5 h-5 text-slate-400"></i>
-                         <div class="loader-spinner absolute hidden"></div>
-                     </div>
-                     <span class="step-text text-sm font-medium text-slate-500 font-['Noto_Sans_Myanmar']">ပုံပြင်ခွဲခြမ်းစိတ်ဖြာခြင်း (Video Analysis)</span>
-                 </div>
-                 
-                 <div class="step-indicator flex items-center gap-4" data-step="translating">
-                     <div class="icon-wrapper w-10 h-10 rounded-full flex items-center justify-center bg-slate-800 transition-all duration-300">
-                         <i data-lucide="languages" class="w-5 h-5 text-slate-400"></i>
-                         <div class="loader-spinner absolute hidden"></div>
-                     </div>
-                     <span class="step-text text-sm font-medium text-slate-500 font-['Noto_Sans_Myanmar']">မြန်မာဘာသာပြန်ဆိုခြင်း (AI Translation)</span>
-                 </div>
+                <textarea id="srtOutput" readonly
+                    class="w-full flex-grow min-h-[320px] p-4 rounded-lg bg-black/60 border border-cyan-500/30 text-cyan-100 placeholder-cyan-700/60 font-mono text-xs leading-relaxed focus:outline-none resize-y"
+                    placeholder="ဘာသာပြန်ထားသော SRT ဤနေရာတွင် ထွက်ပေါ်လာမည်..."></textarea>
 
-                 <div class="step-indicator flex items-center gap-4" data-step="voiceover">
-                     <div class="icon-wrapper w-10 h-10 rounded-full flex items-center justify-center bg-slate-800 transition-all duration-300">
-                         <i data-lucide="mic" class="w-5 h-5 text-slate-400"></i>
-                         <div class="loader-spinner absolute hidden"></div>
-                     </div>
-                     <span class="step-text text-sm font-medium text-slate-500 font-['Noto_Sans_Myanmar']">AI မြန်မာအသံသွင်းခြင်း (Voiceover)</span>
-                 </div>
+                <div id="srtOutputMeta" class="mt-2 font-mono text-[10px] text-cyan-500/60"></div>
 
-                 <div class="step-indicator flex items-center gap-4" data-step="merging">
-                     <div class="icon-wrapper w-10 h-10 rounded-full flex items-center justify-center bg-slate-800 transition-all duration-300">
-                         <i data-lucide="layers" class="w-5 h-5 text-slate-400"></i>
-                         <div class="loader-spinner absolute hidden"></div>
-                     </div>
-                     <span class="step-text text-sm font-medium text-slate-500 font-['Noto_Sans_Myanmar']">ဗီဒီယို ပေါင်းစပ်တည်းဖြတ်ခြင်း (Merging)</span>
-                 </div>
-
-             </div>
-
-             <!-- Action Buttons (Hidden by default, shown on error/completion) -->
-             <div class="mt-8 flex gap-4">
-                 <button id="retry-btn" class="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition-colors border border-slate-700 font-['Noto_Sans_Myanmar'] hidden">
-                     နောက်ပြန်ဆုတ်မည်
-                 </button>
-             </div>
-
-             <div id="result-section" class="mt-8 pt-6 border-t border-slate-700/50 hidden">
-                 <!-- Video Preview Area -->
-                 <video id="preview-video" controls class="w-full rounded-xl shadow-[0_0_15px_rgba(188,19,254,0.3)] border border-slate-700 mb-6 hidden bg-black aspect-video"></video>
-                 
-                 <a id="download-btn" href="#" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white py-4 px-6 rounded-xl font-bold shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all font-['Noto_Sans_Myanmar']">
-                     <i data-lucide="download" class="w-5 h-5"></i>
-                     ဗီဒီယို ဒေါင်းလုဒ်လုပ်ရန်
-                 </a>
-                 <button onclick="location.reload()" class="w-full mt-3 flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 py-3 px-6 rounded-xl font-medium transition-all font-['Noto_Sans_Myanmar']">
-                    အသစ်ထပ်မံပြုလုပ်မည်
-                 </button>
-             </div>
-
+                <button id="sendToTtsBtn" class="mt-4 px-4 py-2.5 rounded-lg bg-purple-950/60 hover:bg-purple-600 border border-purple-500/50 text-purple-300 hover:text-white font-mono text-xs flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                    <span>ဒီစာကို TTS Tab ကို ပို့ပြီး အသံထုတ်ပါ</span>
+                </button>
+            </div>
         </section>
 
     </main>
+    </div>
+    <!-- ═══════════════════════ END SRT TRANSLATOR VIEW ═══════════════════════ -->
 
-    <!-- Initialize empty script and icons -->
-    <script>
-      lucide.createIcons();
-    </script>
-    <script type="module" src="/src/script.js"></script>
-  </body>
+    <!-- ═══════════════════════ MEDIA TRANSCRIPTION VIEW ═══════════════════════ -->
+    <div id="transcribeView" class="hidden">
+    <main class="relative z-20 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+
+        <!-- Left Panel: Key Pool, Upload, Controls & Progress (7 Columns) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+
+            <!-- Gladia + Groq Key Pool Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-orange-500/30">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-orange-500/20">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-key text-orange-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            Transcription Key Pool <span class="text-xs font-mono text-orange-400/70 font-normal">(GLADIA + GROQ + ASSEMBLYAI / AUTO ROTATE)</span>
+                        </h2>
+                    </div>
+                    <button id="toggleTranscribeKeyPanelBtn" class="font-mono text-xs text-orange-300 border border-orange-500/30 rounded px-2 py-1 hover:bg-orange-900/40">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div id="transcribeKeyPanelBody" class="space-y-4">
+                    <div>
+                        <label class="block font-mono text-xs text-cyan-300 uppercase tracking-widest mb-2 font-semibold">
+                            Gladia API Keys (တစ်ကြောင်းလျှင် တစ်ခု / comma လည်းရ)
+                        </label>
+                        <textarea id="gladiaKeysInput" rows="2" placeholder="gla_key_1&#10;gla_key_2"
+                            class="w-full p-3 rounded-lg bg-black/60 border border-cyan-500/30 text-cyan-200 placeholder-cyan-800/60 font-mono text-xs focus:outline-none focus:border-orange-500/80 resize-y"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block font-mono text-xs text-pink-300 uppercase tracking-widest mb-2 font-semibold">
+                            Groq API Keys (တစ်ကြောင်းလျှင် တစ်ခု / comma လည်းရ)
+                        </label>
+                        <textarea id="groqKeysInput" rows="2" placeholder="gsk_key_1&#10;gsk_key_2"
+                            class="w-full p-3 rounded-lg bg-black/60 border border-pink-500/30 text-pink-200 placeholder-pink-800/60 font-mono text-xs focus:outline-none focus:border-orange-500/80 resize-y"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block font-mono text-xs text-purple-300 uppercase tracking-widest mb-2 font-semibold">
+                            Groq Whisper Model
+                        </label>
+                        <select id="groqModelSelect" class="w-full p-2.5 rounded bg-black/60 border border-purple-500/30 text-purple-100 font-mono text-xs focus:outline-none focus:border-orange-500/80">
+                            <option value="whisper-large-v3-turbo" selected>whisper-large-v3-turbo (Fast)</option>
+                            <option value="whisper-large-v3">whisper-large-v3 (Most Accurate)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-mono text-xs text-emerald-300 uppercase tracking-widest mb-2 font-semibold">
+                            AssemblyAI API Keys (တစ်ကြောင်းလျှင် တစ်ခု / comma လည်းရ)
+                        </label>
+                        <textarea id="assemblyaiKeysInput" rows="2" placeholder="aai_key_1&#10;aai_key_2"
+                            class="w-full p-3 rounded-lg bg-black/60 border border-emerald-500/30 text-emerald-200 placeholder-emerald-800/60 font-mono text-xs focus:outline-none focus:border-orange-500/80 resize-y"></textarea>
+                    </div>
+
+                    <p class="font-mono text-[10px] text-cyan-500/60">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        Key သုံးမျိုးလုံးကို round-robin rotate လုပ်ပြီး failure/timeout ဖြစ်ရင် (Gladia ဖြစ်စေ Groq ဖြစ်စေ AssemblyAI ဖြစ်စေ) နောက် key ကို auto ပြောင်းသုံးပါမည်။ Key များကို browser ထဲမှာသာ (localStorage) သိမ်းပြီး ၎င်း provider ၏ server ကိုသာ တိုက်ရိုက်ပို့ပါသည်။
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button id="saveTranscribeKeysBtn" class="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-black font-orbitron font-bold text-xs tracking-widest transition-all">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> SAVE KEYS
+                        </button>
+                        <span id="transcribeSaveStatusMsg" class="font-mono text-xs text-orange-400"></span>
+                        <span class="font-mono text-[10px] px-2 py-1 rounded bg-black/50 border border-cyan-500/30 text-cyan-300">GLADIA: <strong id="gladiaKeyCountBadge" class="text-white">0</strong></span>
+                        <span class="font-mono text-[10px] px-2 py-1 rounded bg-black/50 border border-pink-500/30 text-pink-300">GROQ: <strong id="groqKeyCountBadge" class="text-white">0</strong></span>
+                        <span class="font-mono text-[10px] px-2 py-1 rounded bg-black/50 border border-emerald-500/30 text-emerald-300">ASSEMBLYAI: <strong id="assemblyaiKeyCountBadge" class="text-white">0</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl flex flex-col border-cyan-500/30">
+                <div class="flex justify-between items-center pb-3 mb-4 border-b border-cyan-500/20 flex-wrap gap-2">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-file-audio text-cyan-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            မီဒီယာဖိုင် <span class="text-xs font-mono text-cyan-400/70 font-normal">(UPLOAD MP4 / MP3)</span>
+                        </h2>
+                    </div>
+                    <label for="mediaFileInput" class="cursor-pointer px-3 py-1.5 rounded-lg bg-black/50 border border-cyan-500/40 text-cyan-300 font-mono text-xs hover:border-cyan-300 transition-all">
+                        <i class="fa-solid fa-folder-open mr-1"></i> Choose File
+                    </label>
+                    <input type="file" id="mediaFileInput" accept=".mp4,.mp3,.wav,.m4a,.webm,.ogg,.mpeg,.mpga,video/*,audio/*" class="hidden">
+                </div>
+
+                <div id="mediaFileDropzone" class="border-2 border-dashed border-cyan-500/30 rounded-lg p-6 text-center font-mono text-xs text-cyan-500/60 transition-all cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-cyan-500/50 mb-2 block"></i>
+                    <span id="mediaFileMeta">ဖိုင်ရွေးရန် (.mp4 / .mp3 / .wav / .m4a) — ဒီနေရာသို့ drag &amp; drop လည်းရပါသည်</span>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-pink-500/30">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Language</label>
+                        <select id="transcribeLangSelect" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                            <option value="auto" selected>Auto-detect</option>
+                            <option value="my">မြန်မာ (Myanmar)</option>
+                            <option value="en">English</option>
+                            <option value="th">ภาษาไทย (Thai)</option>
+                            <option value="zh">中文 (Chinese)</option>
+                            <option value="ja">日本語 (Japanese)</option>
+                            <option value="ko">한국어 (Korean)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Max Retries</label>
+                        <input type="number" id="transcribeMaxRetries" value="2" min="1" max="6" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                    </div>
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Timeout (s)</label>
+                        <input type="number" id="transcribeTimeoutSec" value="120" min="30" max="600" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button id="clearTranscribeBtn" class="px-4 py-3 rounded-lg bg-black/40 hover:bg-red-950/50 border border-red-500/30 text-red-300 font-mono text-sm tracking-wider flex items-center justify-center gap-2 transition-all hover:border-red-400">
+                        <i class="fa-solid fa-trash-can"></i><span>CLEAR</span>
+                    </button>
+                    <button id="transcribeBtn" class="px-6 py-3 rounded-lg bg-gradient-to-r from-orange-600 via-pink-600 to-cyan-600 hover:from-orange-500 hover:to-cyan-500 text-white font-orbitron font-bold text-sm tracking-widest shadow-[0_0_20px_rgba(255,140,0,0.4)] hover:shadow-[0_0_30px_rgba(0,243,255,0.6)] flex items-center justify-center gap-3 transition-all transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-microphone-lines text-yellow-300 text-base"></i><span>TRANSCRIBE</span>
+                    </button>
+                    <button id="stopTranscribeBtn" disabled class="px-4 py-3 rounded-lg bg-black/40 hover:bg-yellow-950/50 border border-yellow-500/30 text-yellow-300 font-mono text-sm tracking-wider flex items-center justify-center gap-2 transition-all disabled:opacity-40">
+                        <i class="fa-solid fa-stop"></i><span>STOP</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Panel -->
+            <div id="transcribeProgressPanel" class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-purple-500/30 hidden">
+                <div class="flex justify-between items-center pb-3 mb-3 border-b border-purple-500/20">
+                    <h2 class="font-orbitron font-bold text-sm tracking-wide text-white uppercase">
+                        <i class="fa-solid fa-gears text-purple-400 mr-1"></i> Processing
+                    </h2>
+                    <span id="transcribeStatusBadge" class="font-mono text-xs text-purple-300 bg-purple-950/60 border border-purple-500/30 px-2.5 py-1 rounded">IDLE</span>
+                </div>
+                <div id="transcribeLogBox" class="h-32 overflow-y-auto bg-black/60 border border-purple-500/20 rounded-lg p-2 font-mono text-[10px] text-cyan-300/80 space-y-0.5"></div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Output — SRT / TXT / JSON (5 Columns) -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl flex flex-col flex-grow border-cyan-500/30">
+                <div class="flex justify-between items-center pb-3 mb-4 border-b border-cyan-500/20 flex-wrap gap-2">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-file-export text-cyan-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            ရလဒ် <span id="transcribeDoneBadge" class="text-xs font-mono text-emerald-400/90 font-normal hidden">✓ DONE</span>
+                        </h2>
+                    </div>
+                    <div class="flex gap-1 font-mono text-[10px]">
+                        <button id="outFormatSrtBtn" class="px-2 py-1 rounded bg-cyan-500 text-black font-bold">SRT</button>
+                        <button id="outFormatTxtBtn" class="px-2 py-1 rounded bg-black/60 text-cyan-400 border border-cyan-500/30">TXT</button>
+                        <button id="outFormatJsonBtn" class="px-2 py-1 rounded bg-black/60 text-cyan-400 border border-cyan-500/30">JSON</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 mb-3 flex-wrap">
+                    <button id="formatSrtBtn" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-mono text-xs font-bold transition-all flex items-center gap-1" title="Gemini ဖြင့် fragment/duplicate/overlap များ ဖယ်ရှားပြီး သဘာဝကျသော SRT ပြန်စီပါမည်">
+                        <i class="fa-solid fa-list-check"></i> AI SRT FORMAT
+                    </button>
+                    <button id="fixTimestampsBtn" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-mono text-xs font-bold transition-all flex items-center gap-1" title="Gemini ဖြင့် media ကို တိုက်ရိုက်ခွဲခြမ်းပြီး Timestamp ကို ပြန်ချိန်ညှိပါမည်">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI TIMESTAMP FIX
+                    </button>
+                    <button id="copyTranscribeBtn" class="px-3 py-1.5 rounded-lg bg-black/50 border border-cyan-500/40 text-cyan-300 font-mono text-xs hover:border-cyan-300 transition-all">
+                        <i class="fa-solid fa-copy mr-1"></i> Copy
+                    </button>
+                    <button id="downloadTranscribeBtn" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-black font-mono text-xs font-bold transition-all">
+                        <i class="fa-solid fa-download mr-1"></i> Download
+                    </button>
+                </div>
+
+                <p class="font-mono text-[10px] text-purple-400/70 mb-3 -mt-2">
+                    <i class="fa-solid fa-circle-info mr-1"></i>
+                    AI SRT FORMAT — fragment/duplicate/overlap များကို ဖယ်ရှားပြီး CapCut/YouTube စတိုင် သဘာဝကျသော စာကြောင်းများအဖြစ် ပြန်စီပါမည် (text-only, media ဖိုင်မလို)။ AI TIMESTAMP FIX — "Text to Speech" tab ရဲ့ Gemini key ကိုသုံးပြီး မူရင်း media ဖိုင်ကို တိုက်ရိုက်နားထောင်/ကြည့်ကာ timestamp ကို ပြန်ချိန်ညှိပါမည်။ နှစ်ခုစလုံးသည် subtitle စာသားအကြောင်းအရာကို မပြောင်းလဲပါ။
+                </p>
+
+                <textarea id="transcribeOutput" readonly
+                    class="w-full flex-grow min-h-[320px] p-4 rounded-lg bg-black/60 border border-cyan-500/30 text-cyan-100 placeholder-cyan-700/60 font-mono text-xs leading-relaxed focus:outline-none resize-y"
+                    placeholder="Transcribe လုပ်ပြီးသော SRT / Transcript / JSON ဤနေရာတွင် ထွက်ပေါ်လာမည်..."></textarea>
+
+
+                <div id="transcribeOutputMeta" class="mt-2 font-mono text-[10px] text-cyan-500/60"></div>
+
+                <button id="sendTranscribeToTranslatorBtn" class="mt-4 px-4 py-2.5 rounded-lg bg-purple-950/60 hover:bg-purple-600 border border-purple-500/50 text-purple-300 hover:text-white font-mono text-xs flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                    <span>ဒီ SRT ကို Translator Tab ကို ပို့ပြီး ဘာသာပြန်ပါ</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+    </div>
+    <!-- ═══════════════════════ END MEDIA TRANSCRIPTION VIEW ═══════════════════════ -->
+
+    <!-- ═══════════════════════ AI RECAP STUDIO VIEW ═══════════════════════ -->
+    <div id="recapView" class="hidden">
+    <main class="relative z-20 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+
+        <!-- Left Panel: Scope note, Model panel, Upload, Settings & Progress (7 Columns) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+
+            <!-- Scope / Info Note -->
+            <div class="holo-glass holo-corner p-4 sm:p-5 rounded-xl border-purple-500/30">
+                <p class="font-mono text-[10px] text-cyan-300/80 leading-relaxed">
+                    <i class="fa-solid fa-circle-info text-purple-400 mr-1"></i>
+                    ONE CLICK: မီဒီယာဖိုင် → Transcribe → Clean → မြန်မာဘာသာပြန် → Recap (Summary / Key Points / Chapters) → Titles အထိ တစ်ခါတည်း auto run ပါမည်။ Video ဖိုင်ကို narration အသံနှင့် merge/burn-subtitle လုပ်ခြင်းအတွက် FFmpeg backend လိုအပ်ပြီး ဒီ static browser app ထဲတွင် မပါဝင်ပါ — Recap Narration ကို "Send to TTS" ဖြင့် အသံထုတ်ပြီး ကိုယ်ပိုင် video editor ထဲတွင် ပေါင်းစပ်နိုင်ပါသည်။
+                </p>
+            </div>
+
+            <!-- Recap AI Model Rotation Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-emerald-500/30">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-500/20">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-key text-emerald-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            Recap AI Model Rotation <span class="text-xs font-mono text-emerald-400/70 font-normal">(SHARED GEMINI KEYS)</span>
+                        </h2>
+                    </div>
+                    <button id="toggleRecapKeyPanelBtn" class="font-mono text-xs text-emerald-300 border border-emerald-500/30 rounded px-2 py-1 hover:bg-emerald-900/40">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div id="recapKeyPanelBody" class="space-y-4">
+                    <p class="font-mono text-[10px] text-cyan-500/60 -mt-1">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        Gemini API Key များကို "Text to Speech" tab ရဲ့ <strong class="text-cyan-300">Key &amp; Model Rotation</strong> panel အတူတူပဲ သုံးပါသည်။ Audio Transcribe အတွက်တော့ "မီဒီယာ → SRT" tab ရဲ့ <strong class="text-orange-300">Transcription Key Pool</strong> (Gladia/Groq/AssemblyAI) ကို အတူတူသုံးပါသည် — ဒီနေရာမှာ ထပ်ထည့်စရာမလိုပါ။
+                    </p>
+                    <div>
+                        <label class="block font-mono text-xs text-pink-300 uppercase tracking-widest mb-2 font-semibold">
+                            Recap Processing Model List (တစ်ကြောင်းလျှင် model id တစ်ခု)
+                        </label>
+                        <textarea id="recapModelsInput" rows="3"
+                            class="w-full p-3 rounded-lg bg-black/60 border border-pink-500/30 text-pink-200 placeholder-pink-800/60 font-mono text-xs focus:outline-none focus:border-cyan-500/80 resize-y"></textarea>
+                        <p class="font-mono text-[10px] text-cyan-500/60 mt-1">
+                            Clean / Translate / Recap / Title generation ရန် Gemini text model များ — key/model rotation က auto လုပ်ပေးပါမည်။
+                        </p>
+                    </div>
+                    <button id="saveRecapModelsBtn" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-black font-orbitron font-bold text-xs tracking-widest transition-all">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> SAVE MODELS
+                    </button>
+                    <span id="recapSaveStatusMsg" class="font-mono text-xs text-emerald-400 ml-3"></span>
+                </div>
+            </div>
+
+            <!-- Upload Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl flex flex-col border-cyan-500/30">
+                <div class="flex justify-between items-center pb-3 mb-4 border-b border-cyan-500/20 flex-wrap gap-2">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-file-audio text-cyan-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            မီဒီယာဖိုင် <span class="text-xs font-mono text-cyan-400/70 font-normal">(UPLOAD MP4 / MP3 / WAV / M4A)</span>
+                        </h2>
+                    </div>
+                    <label for="recapFileInput" class="cursor-pointer px-3 py-1.5 rounded-lg bg-black/50 border border-cyan-500/40 text-cyan-300 font-mono text-xs hover:border-cyan-300 transition-all">
+                        <i class="fa-solid fa-folder-open mr-1"></i> Choose File
+                    </label>
+                    <input type="file" id="recapFileInput" accept=".mp4,.mp3,.wav,.m4a,.webm,.ogg,.mpeg,.mpga,video/*,audio/*" class="hidden">
+                </div>
+
+                <div id="recapFileDropzone" class="border-2 border-dashed border-cyan-500/30 rounded-lg p-6 text-center font-mono text-xs text-cyan-500/60 transition-all cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-cyan-500/50 mb-2 block"></i>
+                    <span id="recapFileMeta">ဖိုင်ရွေးရန် (.mp4 / .mp3 / .wav / .m4a) — ဒီနေရာသို့ drag &amp; drop လည်းရပါသည်</span>
+                </div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-pink-500/30">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Source Language</label>
+                        <select id="recapLangSelect" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                            <option value="auto" selected>Auto-detect</option>
+                            <option value="my">မြန်မာ (Myanmar)</option>
+                            <option value="en">English</option>
+                            <option value="th">ภาษาไทย (Thai)</option>
+                            <option value="zh">中文 (Chinese)</option>
+                            <option value="ja">日本語 (Japanese)</option>
+                            <option value="ko">한국어 (Korean)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Max Retries</label>
+                        <input type="number" id="recapMaxRetries" value="2" min="1" max="6" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                    </div>
+                    <div>
+                        <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Timeout (s)</label>
+                        <input type="number" id="recapTimeoutSec" value="120" min="30" max="600" class="w-full p-2 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="block font-mono text-[10px] text-cyan-300 uppercase tracking-widest mb-1.5">Copyright-Safe Rewrite Level</label>
+                    <select id="recapRewriteLevel" class="w-full p-2.5 rounded bg-black/60 border border-cyan-500/30 text-cyan-100 font-mono text-xs focus:outline-none focus:border-pink-500/80">
+                        <option value="low">LOW — မူရင်းအတိုင်းနီးပါးထားပြီး ဖွဲ့စည်းမှုအနည်းငယ်သာ ပြောင်း</option>
+                        <option value="medium" selected>MEDIUM — ဝါကျဖွဲ့စည်းမှု + စကားလုံး အများအပြားပြောင်း</option>
+                        <option value="high">HIGH — ဇာတ်လမ်းအချက်များသာ ထိန်းပြီး လုံးဝပြန်ရေး</option>
+                    </select>
+                    <p class="font-mono text-[10px] text-yellow-400/80 mt-1.5">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                        AI rewriting reduces similarity but does not guarantee copyright clearance.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-3 justify-center mt-4">
+                    <button id="clearRecapBtn" class="px-4 py-3 rounded-lg bg-black/40 hover:bg-red-950/50 border border-red-500/30 text-red-300 font-mono text-sm tracking-wider flex items-center justify-center gap-2 transition-all hover:border-red-400">
+                        <i class="fa-solid fa-trash-can"></i><span>CLEAR</span>
+                    </button>
+                    <button id="generateRecapBtn" class="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-orbitron font-bold text-sm tracking-widest shadow-[0_0_20px_rgba(157,0,255,0.4)] hover:shadow-[0_0_30px_rgba(0,243,255,0.6)] flex items-center justify-center gap-3 transition-all transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-yellow-300 text-base"></i><span>ONE CLICK GENERATE</span>
+                    </button>
+                    <button id="stopRecapBtn" disabled class="px-4 py-3 rounded-lg bg-black/40 hover:bg-yellow-950/50 border border-yellow-500/30 text-yellow-300 font-mono text-sm tracking-wider flex items-center justify-center gap-2 transition-all disabled:opacity-40">
+                        <i class="fa-solid fa-stop"></i><span>STOP</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Panel -->
+            <div id="recapProgressPanel" class="holo-glass holo-corner p-5 sm:p-6 rounded-xl border-purple-500/30 hidden">
+                <div class="flex justify-between items-center pb-3 mb-3 border-b border-purple-500/20">
+                    <h2 class="font-orbitron font-bold text-sm tracking-wide text-white uppercase">
+                        <i class="fa-solid fa-gears text-purple-400 mr-1"></i> Processing
+                    </h2>
+                    <span id="recapStatusBadge" class="font-mono text-xs text-purple-300 bg-purple-950/60 border border-purple-500/30 px-2.5 py-1 rounded">IDLE</span>
+                </div>
+                <div id="recapLogBox" class="h-32 overflow-y-auto bg-black/60 border border-purple-500/20 rounded-lg p-2 font-mono text-[10px] text-cyan-300/80 space-y-0.5"></div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Output — Recap / Titles / Clean / MM (5 Columns) -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            <div class="holo-glass holo-corner p-5 sm:p-6 rounded-xl flex flex-col flex-grow border-cyan-500/30">
+                <div class="flex justify-between items-center pb-3 mb-4 border-b border-cyan-500/20 flex-wrap gap-2">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-file-export text-cyan-400 text-lg"></i>
+                        <h2 class="font-orbitron font-bold text-lg tracking-wide text-white">
+                            ရလဒ် <span id="recapDoneBadge" class="text-xs font-mono text-emerald-400/90 font-normal hidden">✓ DONE</span>
+                        </h2>
+                    </div>
+                    <div class="flex gap-1 font-mono text-[10px] flex-wrap">
+                        <button id="recapFormatRecapBtn" class="px-2 py-1 rounded bg-cyan-500 text-black font-bold">RECAP</button>
+                        <button id="recapFormatTitlesBtn" class="px-2 py-1 rounded bg-black/60 text-cyan-400 border border-cyan-500/30">TITLES</button>
+                        <button id="recapFormatCleanBtn" class="px-2 py-1 rounded bg-black/60 text-cyan-400 border border-cyan-500/30">CLEAN TXT</button>
+                        <button id="recapFormatMmBtn" class="px-2 py-1 rounded bg-black/60 text-cyan-400 border border-cyan-500/30">MM ဘာသာ</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 mb-3">
+                    <button id="copyRecapBtn" class="px-3 py-1.5 rounded-lg bg-black/50 border border-cyan-500/40 text-cyan-300 font-mono text-xs hover:border-cyan-300 transition-all">
+                        <i class="fa-solid fa-copy mr-1"></i> Copy
+                    </button>
+                    <button id="downloadRecapBtn" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-black font-mono text-xs font-bold transition-all">
+                        <i class="fa-solid fa-download mr-1"></i> Download
+                    </button>
+                </div>
+
+                <textarea id="recapOutput" readonly
+                    class="w-full flex-grow min-h-[320px] p-4 rounded-lg bg-black/60 border border-cyan-500/30 text-cyan-100 placeholder-cyan-700/60 font-mono text-xs leading-relaxed focus:outline-none resize-y"
+                    placeholder="ONE CLICK GENERATE နှိပ်ပြီးနောက် Recap Summary / Titles / Clean Transcript / မြန်မာဘာသာပြန် ဤနေရာတွင် ထွက်ပေါ်လာမည်..."></textarea>
+
+                <div id="recapOutputMeta" class="mt-2 font-mono text-[10px] text-cyan-500/60"></div>
+
+                <button id="sendRecapToTtsBtn" class="mt-4 px-4 py-2.5 rounded-lg bg-purple-950/60 hover:bg-purple-600 border border-purple-500/50 text-purple-300 hover:text-white font-mono text-xs flex items-center justify-center gap-2 transition-all">
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                    <span>Recap Narration ကို TTS Tab ကို ပို့ပြီး အသံထုတ်ပါ</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+    </div>
+    <!-- ═══════════════════════ END AI RECAP STUDIO VIEW ═══════════════════════ -->
+
+    <script src="script.js"></script>
+</body>
 </html>
-
-
