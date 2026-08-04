@@ -1,283 +1,436 @@
-const API = ""; // same-origin; point this at your API base URL if hosted separately
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Elements ---
+    const fileInput = document.getElementById('video-input');
+    const apiKeyInput = document.getElementById('gemini-api-key');
+    const startBtn = document.getElementById('start-btn');
+    const dropZone = document.getElementById('drop-zone');
+    const fileInfo = document.getElementById('file-info');
+    const fileNameDisplay = document.getElementById('file-name');
+    
+    // Controls 
+    const voiceSelect = document.getElementById('voice-profile');
+    const aspectRatioSelect = document.getElementById('aspect-ratio');
+    const zoomLevelSlider = document.getElementById('zoom-level');
+    const zoomValueDisplay = document.getElementById('zoom-value');
+    
+    // Status Dashboard
+    const dashboardSection = document.getElementById('dashboard');
+    const mainFormSection = document.getElementById('main-form');
+    const stepIndicators = document.querySelectorAll('.step-indicator');
+    const currentStatusText = document.getElementById('current-status-text');
+    const progressBar = document.getElementById('progress-bar');
+    const errorContainer = document.getElementById('error-container');
+    const errorText = document.getElementById('error-text');
+    const retryBtn = document.getElementById('retry-btn');
+    const resultSection = document.getElementById('result-section');
+    const downloadBtn = document.getElementById('download-btn');
+    const previewVideo = document.getElementById('preview-video');
+    const recentProjectsSection = document.getElementById('recent-projects-section');
+    const recentProjectsList = document.getElementById('recent-projects-list');
+    const clearRecentBtn = document.getElementById('clear-recent-btn');
+    const autoRunToggle = document.getElementById('auto-run-toggle');
+    
+    let selectedFile = null;
+    let pollInterval = null;
 
-// ---------- API key rotation ----------
-// Round-robins across every key you paste in. On a rate-limit/quota error,
-// call markRateLimited(key) and that key is skipped for a cooldown window
-// while the others keep going.
-class KeyManager {
-  constructor(keys = []) {
-    this.keys = keys;
-    this.idx = 0;
-    this.cooldownUntil = new Map();
-  }
-  setKeys(keys) {
-    this.keys = keys;
-    this.idx = 0;
-    this.cooldownUntil.clear();
-  }
-  next() {
-    if (this.keys.length === 0) return null;
-    const now = Date.now();
-    for (let i = 0; i < this.keys.length; i++) {
-      const key = this.keys[this.idx % this.keys.length];
-      this.idx++;
-      const until = this.cooldownUntil.get(key);
-      if (!until || until < now) return key;
+    // --- Local Storage for Auto Run ---
+    const AUTO_RUN_KEY = 'recapai_auto_run';
+    if (localStorage.getItem(AUTO_RUN_KEY) === 'true') {
+        autoRunToggle.checked = true;
     }
-    // everything is cooling down — use the next one anyway rather than stall
-    return this.keys[this.idx % this.keys.length];
-  }
-  markRateLimited(key, cooldownMs = 60000) {
-    this.cooldownUntil.set(key, Date.now() + cooldownMs);
-  }
-  get all() { return this.keys; }
-}
-
-// ---------- Model rotation ----------
-// Cycles through a fixed model list, or hop to the next one when the
-// current model errors out (call next() again inside your catch block).
-class ModelRotator {
-  constructor(models = []) {
-    this.models = models;
-    this.idx = 0;
-  }
-  next() {
-    if (this.models.length === 0) return null;
-    const m = this.models[this.idx % this.models.length];
-    this.idx++;
-    return m;
-  }
-  get all() { return this.models; }
-}
-
-const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts"];
-const TRANSLATE_MODELS = ["gemini-3-flash-preview", "gemini-3.6-flash", "gemini-robotics-er-2-preview"];
-
-const groqKeyManager = new KeyManager();
-const geminiKeyManager = new KeyManager();
-const ttsModelRotator = new ModelRotator(TTS_MODELS);
-const translateModelRotator = new ModelRotator(TRANSLATE_MODELS);
-
-function parseKeysInput(raw) {
-  return raw.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
-}
-
-const STAGES = [
-  ["queued","QUEUED"],
-  ["extracting_audio","AUDIO"],
-  ["transcribing","TRANSCRIBE"],
-  ["cleaning_translating","TRANSLATE"],
-  ["generating_recap","RECAP"],
-  ["dubbing","DUB"],
-  ["merging_video","MERGE"],
-  ["done","DONE"],
-];
-
-let selectedFiles = [];
-let subtitleMode = "soft";
-
-const dropzone = document.getElementById("dropzone");
-const fileInput = document.getElementById("fileInput");
-const fileListEl = document.getElementById("fileList");
-const generateBtn = document.getElementById("generateBtn");
-const voiceSelect = document.getElementById("voiceSelect");
-const speedRange = document.getElementById("speedRange");
-const pitchRange = document.getElementById("pitchRange");
-const speedVal = document.getElementById("speedVal");
-const pitchVal = document.getElementById("pitchVal");
-const recapCheck = document.getElementById("recapCheck");
-const queueSection = document.getElementById("queueSection");
-const queueEl = document.getElementById("queue");
-
-const themeToggleBtn = document.getElementById("themeToggleBtn");
-const settingsToggleBtn = document.getElementById("settingsToggleBtn");
-const settingsBody = document.getElementById("settingsBody");
-const groqKeysInput = document.getElementById("groqKeysInput");
-const geminiKeysInput = document.getElementById("geminiKeysInput");
-const saveKeysBtn = document.getElementById("saveKeysBtn");
-const keysStatus = document.getElementById("keysStatus");
-const ttsModelChips = document.getElementById("ttsModelChips");
-const translateModelChips = document.getElementById("translateModelChips");
-
-// --- theme toggle ---
-function applyTheme(theme) {
-  document.body.classList.toggle("light", theme === "light");
-  themeToggleBtn.textContent = theme === "light" ? "☀️" : "🌙";
-  localStorage.setItem("mds_theme", theme);
-}
-themeToggleBtn.addEventListener("click", () => {
-  applyTheme(document.body.classList.contains("light") ? "dark" : "light");
-});
-
-// --- settings panel collapse ---
-settingsToggleBtn.addEventListener("click", () => {
-  const hidden = settingsBody.classList.toggle("hidden");
-  settingsToggleBtn.textContent = hidden ? "SHOW ▼" : "HIDE ▲";
-});
-
-// --- model chips (read-only, just shows the rotation order) ---
-ttsModelChips.innerHTML = TTS_MODELS.map(m => `<span class="model-chip"><span class="dot"></span>${m}</span>`).join("");
-translateModelChips.innerHTML = TRANSLATE_MODELS.map(m => `<span class="model-chip"><span class="dot"></span>${m}</span>`).join("");
-
-// --- keys: load from localStorage, save back on click ---
-function loadKeySettings() {
-  const groqRaw = localStorage.getItem("mds_groq_keys") || "";
-  const geminiRaw = localStorage.getItem("mds_gemini_keys") || "";
-  groqKeysInput.value = groqRaw;
-  geminiKeysInput.value = geminiRaw;
-  groqKeyManager.setKeys(parseKeysInput(groqRaw));
-  geminiKeyManager.setKeys(parseKeysInput(geminiRaw));
-}
-saveKeysBtn.addEventListener("click", () => {
-  localStorage.setItem("mds_groq_keys", groqKeysInput.value);
-  localStorage.setItem("mds_gemini_keys", geminiKeysInput.value);
-  groqKeyManager.setKeys(parseKeysInput(groqKeysInput.value));
-  geminiKeyManager.setKeys(parseKeysInput(geminiKeysInput.value));
-  keysStatus.textContent = `SAVED · ${groqKeyManager.all.length} Groq key(s), ${geminiKeyManager.all.length} Gemini key(s)`;
-  setTimeout(() => { keysStatus.textContent = ""; }, 3000);
-});
-
-applyTheme(localStorage.getItem("mds_theme") || "dark");
-loadKeySettings();
-
-// --- voices ---
-fetch(`${API}/api/voices`).then(r => r.json()).then(d => {
-  voiceSelect.innerHTML = d.voices.map(v => `<option value="${v}">${v}</option>`).join("");
-}).catch(() => {
-  voiceSelect.innerHTML = `<option value="Kore">Kore</option>`;
-});
-
-// --- subtitle mode buttons ---
-document.querySelectorAll(".sub-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    subtitleMode = btn.dataset.sub;
-    document.querySelectorAll(".sub-btn").forEach(b => {
-      b.classList.toggle("glow-magenta", b === btn);
-      b.classList.toggle("text-[var(--magenta)]", b === btn);
+    autoRunToggle.addEventListener('change', (e) => {
+        localStorage.setItem(AUTO_RUN_KEY, e.target.checked);
     });
-  });
-});
-document.querySelector('[data-sub="soft"]').click();
 
-speedRange.addEventListener("input", () => speedVal.textContent = parseFloat(speedRange.value).toFixed(2) + "x");
-pitchRange.addEventListener("input", () => pitchVal.textContent = (pitchRange.value > 0 ? "+" : "") + pitchRange.value + " st");
+    // --- Local Storage for Recent Projects ---
+    const RECENT_PROJECTS_KEY = 'recapai_recent_projects';
 
-// --- file selection ---
-dropzone.addEventListener("click", () => fileInput.click());
-["dragenter","dragover"].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add("drag"); }));
-["dragleave","drop"].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove("drag"); }));
-dropzone.addEventListener("drop", e => addFiles(e.dataTransfer.files));
-fileInput.addEventListener("change", e => addFiles(e.target.files));
-
-function addFiles(fileListObj) {
-  selectedFiles = [...selectedFiles, ...Array.from(fileListObj)];
-  renderFileList();
-  generateBtn.disabled = selectedFiles.length === 0;
-}
-
-function renderFileList() {
-  fileListEl.innerHTML = selectedFiles.map((f, i) =>
-    `<li class="flex justify-between"><span>${f.name}</span><span>${(f.size/1024/1024).toFixed(1)} MB</span></li>`
-  ).join("");
-}
-
-// --- generate ---
-generateBtn.addEventListener("click", async () => {
-  generateBtn.disabled = true;
-  generateBtn.textContent = "▶ SUBMITTING…";
-  queueSection.classList.remove("hidden");
-
-  const form = new FormData();
-  selectedFiles.forEach(f => form.append("files", f));
-  form.append("voice_name", voiceSelect.value);
-  form.append("speed", speedRange.value);
-  form.append("pitch_semitones", pitchRange.value);
-  form.append("subtitle_mode", subtitleMode);
-  form.append("make_recap", recapCheck.checked);
-
-  // Keys + models are sent as full lists so the backend can round-robin
-  // keys and fall back across models itself (same pattern as key_manager.py).
-  form.append("groq_api_keys", groqKeyManager.all.join(","));
-  form.append("gemini_api_keys", geminiKeyManager.all.join(","));
-  form.append("tts_models", TTS_MODELS.join(","));
-  form.append("translate_models", TRANSLATE_MODELS.join(","));
-
-  try {
-    const endpoint = selectedFiles.length > 1 ? "/api/jobs/batch" : "/api/jobs";
-    const body = selectedFiles.length > 1 ? form : (() => {
-      const f2 = new FormData();
-      f2.append("file", selectedFiles[0]);
-      form.forEach((v, k) => { if (k !== "files") f2.append(k, v); });
-      return f2;
-    })();
-    const resp = await fetch(`${API}${endpoint}`, { method: "POST", body });
-    if (!resp.ok) throw new Error(await resp.text());
-    const jobs = selectedFiles.length > 1 ? await resp.json() : [await resp.json()];
-    jobs.forEach(job => trackJob(job));
-    selectedFiles = [];
-    renderFileList();
-  } catch (err) {
-    alert("Upload failed: " + err.message);
-  } finally {
-    generateBtn.disabled = false;
-    generateBtn.textContent = "▶ GENERATE";
-  }
-});
-
-function stageIndex(status) {
-  const i = STAGES.findIndex(([key]) => key === status);
-  return i === -1 ? 0 : i;
-}
-
-function trackJob(job) {
-  const card = document.createElement("div");
-  card.className = "rounded-md bg-[var(--surface-2)] border border-[var(--line)] p-4";
-  card.innerHTML = `
-    <div class="flex justify-between items-center mb-3">
-      <span class="font-display text-sm truncate max-w-[60%]">${job.original_filename}</span>
-      <span class="font-mono text-xs text-[var(--cyan)]" data-role="pct">${job.progress}%</span>
-    </div>
-    <div class="flex gap-2 mb-3" data-role="stages"></div>
-    <div class="font-mono text-[10px] text-[var(--ink-dim)]" data-role="status">${job.status}</div>
-    <div data-role="actions" class="mt-3"></div>
-  `;
-  queueEl.prepend(card);
-
-  const stagesEl = card.querySelector('[data-role="stages"]');
-  stagesEl.innerHTML = STAGES.map(([key, label]) =>
-    `<div class="flex-1 text-center">
-       <div class="stage-dot mx-auto mb-1" data-key="${key}"></div>
-       <div class="font-mono text-[8px] text-[var(--ink-dim)]">${label}</div>
-     </div>`
-  ).join("");
-
-  const poll = setInterval(async () => {
-    try {
-      const r = await fetch(`${API}/api/jobs/${job.id}`);
-      const data = await r.json();
-      updateCard(card, data);
-      if (data.status === "done" || data.status === "failed") clearInterval(poll);
-    } catch (e) {
-      clearInterval(poll);
+    function loadRecentProjects() {
+        try {
+            const stored = localStorage.getItem(RECENT_PROJECTS_KEY);
+            let projects = stored ? JSON.parse(stored) : [];
+            // Optional: limit to 10 recent
+            projects = projects.slice(0, 10);
+            return projects;
+        } catch (e) {
+            console.error("Failed to load recent projects:", e);
+            return [];
+        }
     }
-  }, 2000);
-}
 
-function updateCard(card, data) {
-  card.querySelector('[data-role="pct"]').textContent = data.progress + "%";
-  card.querySelector('[data-role="status"]').textContent = data.error_message
-    ? `FAILED: ${data.error_message}` : data.status.toUpperCase();
+    function saveRecentProject(jobId, fileName) {
+        const projects = loadRecentProjects();
+        const existingIdx = projects.findIndex(p => p.jobId === jobId);
+        if (existingIdx !== -1) {
+            projects.splice(existingIdx, 1);
+        }
+        projects.unshift({
+            jobId,
+            fileName: fileName || `Video_${jobId.substring(0, 6)}`,
+            timestamp: Date.now()
+        });
+        localStorage.setItem(RECENT_PROJECTS_KEY, JSON.stringify(projects.slice(0, 10)));
+        renderRecentProjects();
+    }
 
-  const idx = stageIndex(data.status);
-  card.querySelectorAll(".stage-dot").forEach((dot, i) => {
-    dot.classList.remove("active", "done", "failed");
-    if (data.status === "failed" && i === idx) dot.classList.add("failed");
-    else if (i < idx || data.status === "done") dot.classList.add("done");
-    else if (i === idx) dot.classList.add("active");
-  });
+    function renderRecentProjects() {
+        const projects = loadRecentProjects();
+        if (projects.length === 0) {
+            recentProjectsSection.classList.add('hidden');
+            return;
+        }
+        
+        recentProjectsSection.classList.remove('hidden');
+        recentProjectsList.innerHTML = '';
+        
+        projects.forEach(project => {
+            const dateStr = new Date(project.timestamp).toLocaleString('my-MM', {
+                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+            
+            const item = document.createElement('div');
+            item.className = 'w-full flex items-center justify-between p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-cyan-500/50 transition-colors cursor-pointer group';
+            item.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-slate-700 group-hover:bg-cyan-900 flex flex-col items-center justify-center transition-colors">
+                        <i data-lucide="play-circle" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-200 font-['Noto_Sans_Myanmar'] truncate w-40 sm:w-56" title="${project.fileName}">${project.fileName}</p>
+                        <p class="text-xs text-slate-500">${dateStr}</p>
+                    </div>
+                </div>
+                <div class="text-slate-400 group-hover:text-cyan-400 transition-colors">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </div>
+            `;
+            
+            item.addEventListener('click', () => {
+                viewRecentProject(project.jobId, project.fileName);
+            });
+            
+            recentProjectsList.appendChild(item);
+        });
+        
+        // Re-initialize icons for newly added HTML
+        lucide.createIcons();
+    }
 
-  const actions = card.querySelector('[data-role="actions"]');
-  if (data.status === "done") {
-    actions.innerHTML = `<a href="${API}/api/jobs/${data.id}/download" class="inline-block px-4 py-2 rounded bg-[var(--amber)] text-black font-display text-xs">↓ DOWNLOAD MP4</a>`;
-  }
-}
+    function viewRecentProject(jobId, fileName) {
+        hideError();
+        mainFormSection.classList.add('hidden');
+        recentProjectsSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        
+        // Skip polling, directly show completion for an old job
+        updateDashboard('completed', 100);
+        document.getElementById('current-status-text').innerHTML = `✅ ${fileName} ပြန်လည်ဖွင့်နေသည်...`;
+        
+        resultSection.classList.remove('hidden');
+        
+        const streamUrl = `/api/stream/${jobId}`;
+        const downloadUrl = `/api/download/${jobId}`;
+        
+        downloadBtn.href = downloadUrl;
+        previewVideo.src = streamUrl;
+        previewVideo.classList.remove('hidden');
+    }
+
+    clearRecentBtn.addEventListener('click', () => {
+        localStorage.removeItem(RECENT_PROJECTS_KEY);
+        renderRecentProjects();
+    });
+
+    // Initialize recent projects on load
+    renderRecentProjects();
+
+    // --- Helpers ---
+    function formatBytes(bytes, decimals = 2) {
+        if (!+bytes) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    }
+
+    // --- Event Listeners ---
+    
+    zoomLevelSlider.addEventListener('input', (e) => {
+        zoomValueDisplay.textContent = `${e.target.value}%`;
+    });
+
+    // File Drag & Drop
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-cyan-400', 'bg-cyan-900/20');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-cyan-400', 'bg-cyan-900/20');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-cyan-400', 'bg-cyan-900/20');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            handleFileSelection(e.dataTransfer.files[0]);
+        }
+    });
+
+    // File Click
+    dropZone.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            handleFileSelection(e.target.files[0]);
+        }
+    });
+
+    retryBtn.addEventListener('click', () => {
+       resetUI();
+    });
+
+    function handleFileSelection(file) {
+        if (!file.type.startsWith('video/')) {
+            showError('ကျေးဇူးပြု၍ ဗီဒီယိုဖိုင် (MP4, MOV, MKV) ကိုသာ ရွေးချယ်ပါ။');
+            return;
+        }
+        selectedFile = file;
+        fileNameDisplay.textContent = `${file.name} (${formatBytes(file.size)})`;
+        fileInfo.classList.remove('hidden');
+        hideError();
+        
+        if (autoRunToggle.checked) {
+            startBtn.click();
+        }
+    }
+
+    startBtn.addEventListener('click', async () => {
+        const apiKey = apiKeyInput.value.trim();
+        if (!apiKey) {
+            showError('Gemini API Key ထည့်သွင်းရန် လိုအပ်ပါသည်။');
+            return;
+        }
+        if (!selectedFile) {
+            showError('ကျေးဇူးပြု၍ ဗီဒီယိုဖိုင် တစ်ခုရွေးချယ်ပါ။');
+            return;
+        }
+
+        startProcess(apiKey);
+    });
+
+    // --- API Calls ---
+
+    async function startProcess(apiKey) {
+        hideError();
+        mainFormSection.classList.add('hidden');
+        recentProjectsSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        resultSection.classList.add('hidden');
+        resetDashboard();
+
+        const formData = new FormData();
+        formData.append('video', selectedFile);
+        formData.append('apiKey', apiKey);
+        formData.append('voiceProfile', voiceSelect.value);
+        formData.append('aspectRatio', aspectRatioSelect.value);
+        formData.append('zoomLevel', zoomLevelSlider.value);
+        
+        try {
+            const response = await fetch('/api/process', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("text/html")) {
+                throw new Error("Session expired or authentication required. Please reload the page.");
+            }
+
+            if (!response.ok) {
+                let errData;
+                try {
+                    errData = await response.json();
+                } catch (e) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+                throw new Error(errData.error || 'Failed to upload video');
+            }
+
+            const text = await response.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error("Invalid JSON response:", text);
+                throw new Error("Server returned an invalid response.");
+            }
+            startPolling(data.jobId);
+            
+        } catch (error) {
+            showError(error.message);
+            dashboardSection.classList.add('hidden');
+            mainFormSection.classList.remove('hidden');
+        }
+    }
+
+    function startPolling(jobId) {
+        let errorCount = 0;
+        
+        pollInterval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/status/${jobId}`, { credentials: 'same-origin' });
+                const contentType = res.headers.get("content-type");
+                
+                if (contentType && contentType.includes("text/html")) {
+                    throw new Error("Session expired or authentication required. Please reload the page.");
+                }
+
+                if (!res.ok) {
+                    throw new Error(`Server error: ${res.statusText}`);
+                }
+                
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch(e) {
+                    throw new Error(`Invalid JSON response: ${text.substring(0, 50)}...`);
+                }
+                
+                errorCount = 0; // reset error count
+                
+                updateDashboard(data.step, data.progress, data.message);
+
+                if (data.status === 'error') {
+                    clearInterval(pollInterval);
+                    showError(data.error || 'Processing failed');
+                    // highlight error step
+                    document.getElementById('current-status-text').textContent = '⚠️ လုပ်ဆောင်မှု မအောင်မြင်ပါ';
+                    return;
+                }
+
+                if (data.status === 'completed') {
+                    clearInterval(pollInterval);
+                    document.getElementById('current-status-text').textContent = '✅ အောင်မြင်စွာ ပြီးစီးပါပြီ';
+                    resultSection.classList.remove('hidden');
+                    downloadBtn.href = data.resultUrl;
+                    previewVideo.src = data.resultUrl.replace('/api/download/', '/api/stream/');
+                    previewVideo.classList.remove('hidden');
+                    saveRecentProject(jobId, selectedFile ? selectedFile.name : `Video_${jobId.substring(0,6)}`);
+                }
+                
+            } catch (err) {
+                console.error("Polling error:", err);
+                errorCount++;
+                if (errorCount > 5) {
+                    clearInterval(pollInterval);
+                    showError("Connection lost: " + err.message);
+                }
+            }
+        }, 2000);
+    }
+
+    // --- UI Updates ---
+
+    function resetUI() {
+        dashboardSection.classList.add('hidden');
+        mainFormSection.classList.remove('hidden');
+        renderRecentProjects(); // Also shows if not empty
+        hideError();
+        if (pollInterval) clearInterval(pollInterval);
+        previewVideo.classList.add('hidden');
+        previewVideo.src = "";
+    }
+
+    function showError(msg) {
+        errorContainer.classList.remove('hidden');
+        errorText.textContent = msg;
+    }
+
+    function hideError() {
+        errorContainer.classList.add('hidden');
+        errorText.textContent = '';
+    }
+
+    function updateDashboard(currentStepId, progress, message) {
+        const stepOrder = ['uploading', 'analyzing', 'translating', 'voiceover', 'merging', 'completed'];
+        const currentIdx = stepOrder.indexOf(currentStepId);
+        
+        const myanmarLabels = {
+            'uploading': 'ဗီဒီယို တင်ပို့နေသည်...',
+            'analyzing': 'အသံနှင့် ပုံရိပ် ခွဲခြမ်းစိတ်ဖြာနေသည်...',
+            'translating': 'မြန်မာဘာသာသို့ ပြန်ဆိုနေသည်...',
+            'voiceover': 'AI အသံသွင်းနေသည်...',
+            'merging': 'ဗီဒီယိုနှင့် အသံ ပေါင်းစပ်နေသည်...',
+            'completed': 'အားလုံးပြီးစီးပါပြီ'
+        };
+
+        currentStatusText.textContent = message || myanmarLabels[currentStepId] || 'လုပ်ဆောင်နေသည်...';
+        
+        // Calculate global progress
+        let globalProgress = 0;
+        if (currentIdx === -1) { globalProgress = 0; }
+        else if (currentStepId === 'completed') { globalProgress = 100; }
+        else {
+            const baseProgress = (currentIdx / (stepOrder.length - 1)) * 100;
+            const stepContribution = (progress / 100) * (100 / (stepOrder.length - 1));
+            globalProgress = baseProgress + stepContribution;
+        }
+        progressBar.style.width = `${Math.min(globalProgress, 100)}%`;
+
+        // Update step UI
+        stepIndicators.forEach(indicator => {
+            const stepId = indicator.dataset.step;
+            const stepIdx = stepOrder.indexOf(stepId);
+            const iconWrap = indicator.querySelector('.icon-wrapper');
+            const iconSvg = indicator.querySelector('svg');
+            const textEl = indicator.querySelector('.step-text');
+            const loadingSpinner = indicator.querySelector('.loader-spinner');
+            
+            if (stepIdx < currentIdx || currentStepId === 'completed') {
+                // Completed
+                iconWrap.classList.replace('bg-slate-800', 'bg-purple-600');
+                iconSvg.classList.replace('text-slate-400', 'text-white');
+                textEl.classList.replace('text-slate-500', 'text-slate-200');
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
+            } else if (stepIdx === currentIdx) {
+                // Active
+                iconWrap.classList.replace('bg-slate-800', 'bg-cyan-600');
+                iconSvg.classList.replace('text-slate-400', 'text-white');
+                iconWrap.classList.add('shadow-[0_0_15px_rgba(0,243,255,0.5)]');
+                textEl.classList.replace('text-slate-500', 'text-cyan-400');
+                if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+            } else {
+                // Pending
+                iconWrap.classList.remove('bg-purple-600', 'bg-cyan-600', 'shadow-[0_0_15px_rgba(0,243,255,0.5)]');
+                iconWrap.classList.add('bg-slate-800');
+                iconSvg.classList.remove('text-white');
+                iconSvg.classList.add('text-slate-400');
+                textEl.classList.remove('text-slate-200', 'text-cyan-400');
+                textEl.classList.add('text-slate-500');
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
+            }
+        });
+    }
+
+    function resetDashboard() {
+        progressBar.style.width = '0%';
+        currentStatusText.textContent = 'စတင်နေသည်...';
+        stepIndicators.forEach(indicator => {
+             const iconWrap = indicator.querySelector('.icon-wrapper');
+             const iconSvg = indicator.querySelector('svg');
+             const textEl = indicator.querySelector('.step-text');
+             const loadingSpinner = indicator.querySelector('.loader-spinner');
+             
+             iconWrap.className = 'icon-wrapper w-10 h-10 rounded-full flex items-center justify-center bg-slate-800 transition-all duration-300';
+             iconSvg.setAttribute('class', 'w-5 h-5 text-slate-400');
+             textEl.className = 'step-text text-sm font-medium text-slate-500 transition-colors';
+             if (loadingSpinner) loadingSpinner.classList.add('hidden');
+        });
+    }
+});
