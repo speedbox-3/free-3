@@ -65,3 +65,40 @@
   .stage-dot.failed{ background:var(--magenta); }
 
   ::selection{ background:var(--magenta); color:#fff; }
+
+  /* --- Model / key chips --- */
+  .model-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 10px; border-radius:999px;
+    border:1px solid var(--line); background:var(--surface-2);
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--ink-dim);
+  }
+  .model-chip .dot{ width:6px; height:6px; border-radius:50%; background:var(--amber); flex-shrink:0; }
+
+  textarea{
+    font-family:'JetBrains Mono',monospace;
+    resize:vertical;
+  }
+  textarea::placeholder{ color:var(--ink-dim); opacity:.6; }
+
+  /* --- Light theme --- */
+  body.light{
+    --bg:#f5f3fb;
+    --surface:#ffffff;
+    --surface-2:#f0edf9;
+    --line:#dcd6ee;
+    --ink:#201c36;
+    --ink-dim:#6b6488;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(57,242,224,0.05), transparent 40%),
+      radial-gradient(circle at 85% 20%, rgba(255,47,146,0.06), transparent 45%),
+      var(--bg);
+    color:var(--ink);
+  }
+  body.light .text-glow{ text-shadow:none; }
+  body.light .grid-overlay{
+    background-image:
+      linear-gradient(rgba(120,80,190,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120,80,190,0.06) 1px, transparent 1px);
+  }
+  body.light ::selection{ background:var(--magenta); color:#fff; }

@@ -22,8 +22,48 @@
         <div class="font-mono text-[10px] text-[var(--ink-dim)] tracking-widest">RECAP // TRANSLATE // DUB — v1.0</div>
       </div>
     </div>
-    <div class="font-mono text-[10px] text-[var(--ink-dim)] hidden sm:block">MP4 IN → MP4 OUT</div>
+    <div class="flex items-center gap-3">
+      <button id="themeToggleBtn" title="Toggle theme" class="w-8 h-8 rounded-sm border border-[var(--line)] flex items-center justify-center text-sm hover:border-[var(--cyan)] transition">🌙</button>
+      <div class="font-mono text-[10px] text-[var(--ink-dim)] hidden sm:block">MP4 IN → MP4 OUT</div>
+    </div>
   </header>
+
+  <!-- Keys & Models -->
+  <section class="relative rounded-lg bg-[var(--surface)] p-6 md:p-8 mb-8 border border-[var(--line)]">
+    <div class="flex items-center justify-between mb-5">
+      <div class="font-mono text-[11px] text-[var(--cyan)] tracking-widest">00 · KEYS &amp; MODELS</div>
+      <button id="settingsToggleBtn" class="font-mono text-[10px] text-[var(--ink-dim)] hover:text-[var(--cyan)] transition">HIDE ▲</button>
+    </div>
+    <div id="settingsBody" class="space-y-6">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block font-mono text-xs text-[var(--ink-dim)] mb-2">GROQ API KEYS <span class="text-[var(--ink-dim)]">(comma or newline separated · auto-rotates)</span></label>
+          <textarea id="groqKeysInput" rows="2" placeholder="gsk_xxxxx, gsk_yyyyy" class="w-full bg-[var(--surface-2)] border border-[var(--line)] rounded px-3 py-2 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[var(--cyan)]"></textarea>
+        </div>
+        <div>
+          <label class="block font-mono text-xs text-[var(--ink-dim)] mb-2">GEMINI API KEYS <span class="text-[var(--ink-dim)]">(comma or newline separated · auto-rotates)</span></label>
+          <textarea id="geminiKeysInput" rows="2" placeholder="AIzaXXXX, AIzaYYYY" class="w-full bg-[var(--surface-2)] border border-[var(--line)] rounded px-3 py-2 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[var(--cyan)]"></textarea>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block font-mono text-xs text-[var(--ink-dim)] mb-2">TTS MODELS <span class="text-[var(--amber)]">· auto-rotate on failure</span></label>
+          <div id="ttsModelChips" class="flex flex-wrap gap-2"></div>
+        </div>
+        <div>
+          <label class="block font-mono text-xs text-[var(--ink-dim)] mb-2">MYANMAR TRANSLATE MODELS <span class="text-[var(--amber)]">· auto-rotate on failure</span></label>
+          <div id="translateModelChips" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="saveKeysBtn" class="px-4 py-2 rounded font-display text-xs bg-[var(--cyan)] text-black hover:brightness-110 transition">SAVE KEYS</button>
+        <span id="keysStatus" class="font-mono text-[10px] text-[var(--ink-dim)]"></span>
+      </div>
+      <p class="font-mono text-[10px] text-[var(--ink-dim)]">Keys are stored only in this browser (localStorage) and sent only with your own job requests — never share keys or commit them to a public repo.</p>
+    </div>
+  </section>
 
   <!-- Upload / ingest terminal -->
   <section class="relative rounded-lg bg-[var(--surface)] p-6 md:p-8 mb-8 overflow-hidden glow-cyan">

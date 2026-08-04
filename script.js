@@ -1,5 +1,67 @@
 const API = ""; // same-origin; point this at your API base URL if hosted separately
 
+// ---------- API key rotation ----------
+// Round-robins across every key you paste in. On a rate-limit/quota error,
+// call markRateLimited(key) and that key is skipped for a cooldown window
+// while the others keep going.
+class KeyManager {
+  constructor(keys = []) {
+    this.keys = keys;
+    this.idx = 0;
+    this.cooldownUntil = new Map();
+  }
+  setKeys(keys) {
+    this.keys = keys;
+    this.idx = 0;
+    this.cooldownUntil.clear();
+  }
+  next() {
+    if (this.keys.length === 0) return null;
+    const now = Date.now();
+    for (let i = 0; i < this.keys.length; i++) {
+      const key = this.keys[this.idx % this.keys.length];
+      this.idx++;
+      const until = this.cooldownUntil.get(key);
+      if (!until || until < now) return key;
+    }
+    // everything is cooling down — use the next one anyway rather than stall
+    return this.keys[this.idx % this.keys.length];
+  }
+  markRateLimited(key, cooldownMs = 60000) {
+    this.cooldownUntil.set(key, Date.now() + cooldownMs);
+  }
+  get all() { return this.keys; }
+}
+
+// ---------- Model rotation ----------
+// Cycles through a fixed model list, or hop to the next one when the
+// current model errors out (call next() again inside your catch block).
+class ModelRotator {
+  constructor(models = []) {
+    this.models = models;
+    this.idx = 0;
+  }
+  next() {
+    if (this.models.length === 0) return null;
+    const m = this.models[this.idx % this.models.length];
+    this.idx++;
+    return m;
+  }
+  get all() { return this.models; }
+}
+
+const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts"];
+const TRANSLATE_MODELS = ["gemini-3-flash-preview", "gemini-3.6-flash", "gemini-robotics-er-2-preview"];
+
+const groqKeyManager = new KeyManager();
+const geminiKeyManager = new KeyManager();
+const ttsModelRotator = new ModelRotator(TTS_MODELS);
+const translateModelRotator = new ModelRotator(TRANSLATE_MODELS);
+
+function parseKeysInput(raw) {
+  return raw.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+}
+
 const STAGES = [
   ["queued","QUEUED"],
   ["extracting_audio","AUDIO"],
@@ -26,6 +88,57 @@ const pitchVal = document.getElementById("pitchVal");
 const recapCheck = document.getElementById("recapCheck");
 const queueSection = document.getElementById("queueSection");
 const queueEl = document.getElementById("queue");
+
+const themeToggleBtn = document.getElementById("themeToggleBtn");
+const settingsToggleBtn = document.getElementById("settingsToggleBtn");
+const settingsBody = document.getElementById("settingsBody");
+const groqKeysInput = document.getElementById("groqKeysInput");
+const geminiKeysInput = document.getElementById("geminiKeysInput");
+const saveKeysBtn = document.getElementById("saveKeysBtn");
+const keysStatus = document.getElementById("keysStatus");
+const ttsModelChips = document.getElementById("ttsModelChips");
+const translateModelChips = document.getElementById("translateModelChips");
+
+// --- theme toggle ---
+function applyTheme(theme) {
+  document.body.classList.toggle("light", theme === "light");
+  themeToggleBtn.textContent = theme === "light" ? "☀️" : "🌙";
+  localStorage.setItem("mds_theme", theme);
+}
+themeToggleBtn.addEventListener("click", () => {
+  applyTheme(document.body.classList.contains("light") ? "dark" : "light");
+});
+
+// --- settings panel collapse ---
+settingsToggleBtn.addEventListener("click", () => {
+  const hidden = settingsBody.classList.toggle("hidden");
+  settingsToggleBtn.textContent = hidden ? "SHOW ▼" : "HIDE ▲";
+});
+
+// --- model chips (read-only, just shows the rotation order) ---
+ttsModelChips.innerHTML = TTS_MODELS.map(m => `<span class="model-chip"><span class="dot"></span>${m}</span>`).join("");
+translateModelChips.innerHTML = TRANSLATE_MODELS.map(m => `<span class="model-chip"><span class="dot"></span>${m}</span>`).join("");
+
+// --- keys: load from localStorage, save back on click ---
+function loadKeySettings() {
+  const groqRaw = localStorage.getItem("mds_groq_keys") || "";
+  const geminiRaw = localStorage.getItem("mds_gemini_keys") || "";
+  groqKeysInput.value = groqRaw;
+  geminiKeysInput.value = geminiRaw;
+  groqKeyManager.setKeys(parseKeysInput(groqRaw));
+  geminiKeyManager.setKeys(parseKeysInput(geminiRaw));
+}
+saveKeysBtn.addEventListener("click", () => {
+  localStorage.setItem("mds_groq_keys", groqKeysInput.value);
+  localStorage.setItem("mds_gemini_keys", geminiKeysInput.value);
+  groqKeyManager.setKeys(parseKeysInput(groqKeysInput.value));
+  geminiKeyManager.setKeys(parseKeysInput(geminiKeysInput.value));
+  keysStatus.textContent = `SAVED · ${groqKeyManager.all.length} Groq key(s), ${geminiKeyManager.all.length} Gemini key(s)`;
+  setTimeout(() => { keysStatus.textContent = ""; }, 3000);
+});
+
+applyTheme(localStorage.getItem("mds_theme") || "dark");
+loadKeySettings();
 
 // --- voices ---
 fetch(`${API}/api/voices`).then(r => r.json()).then(d => {
@@ -81,6 +194,13 @@ generateBtn.addEventListener("click", async () => {
   form.append("pitch_semitones", pitchRange.value);
   form.append("subtitle_mode", subtitleMode);
   form.append("make_recap", recapCheck.checked);
+
+  // Keys + models are sent as full lists so the backend can round-robin
+  // keys and fall back across models itself (same pattern as key_manager.py).
+  form.append("groq_api_keys", groqKeyManager.all.join(","));
+  form.append("gemini_api_keys", geminiKeyManager.all.join(","));
+  form.append("tts_models", TTS_MODELS.join(","));
+  form.append("translate_models", TRANSLATE_MODELS.join(","));
 
   try {
     const endpoint = selectedFiles.length > 1 ? "/api/jobs/batch" : "/api/jobs";
